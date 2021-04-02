@@ -1,16 +1,19 @@
 use teloxide::prelude::*;
 
+mod command;
+use command::command::answer;
+
 #[tokio::main]
 async fn main() {
+    run().await;
+}
+
+async fn run() {
     teloxide::enable_logging!();
-    log::info!("Starting dices_bot...");
+    log::info!("Starting group-queue ...");
 
     let bot = Bot::from_env().auto_send();
 
-    teloxide::repl(bot, |message| async move {
-        message.answer_dice().await?;
-        respond(())
-    })
-        .await;
+    let bot_name: String = "group-queue".to_string();
+    teloxide::commands_repl(bot, bot_name, answer).await;
 }
-
