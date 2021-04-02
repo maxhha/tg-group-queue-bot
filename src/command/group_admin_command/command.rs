@@ -7,7 +7,7 @@ type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
 pub async fn add_subject(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.answer("Seems like you forgot subject").send().await?;
+        cx.answer("Seems like you forgot to specify subject").send().await?;
         return Ok(());
     }
 
@@ -26,7 +26,7 @@ pub async fn add_subject(cx: &Cx, subject: String) -> Res {
 
 pub async fn pop(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.answer("Seems like you forgot subject").send().await?;
+        cx.answer("Seems like you forgot to specify subject").send().await?;
         return Ok(());
     }
 
@@ -45,7 +45,7 @@ pub async fn pop(cx: &Cx, subject: String) -> Res {
 
 async fn skip(cx: &Cx, subject: String, username: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.answer("Seems like you forgot subject").send().await?;
+        cx.answer("Seems like you forgot to specify subject").send().await?;
         return Ok(());
     }
 
@@ -71,7 +71,7 @@ async fn skip(cx: &Cx, subject: String, username: String) -> Res {
 
 pub async fn ban(cx: &Cx, username: String) -> Res {
     if username.trim_start().is_empty() {
-        cx.answer("Seems like you forgot username").send().await?;
+        cx.answer("Seems like you forgot to specify username").send().await?;
         return Ok(());
     }
 
@@ -92,7 +92,7 @@ pub async fn ban(cx: &Cx, username: String) -> Res {
 
 pub async fn delete_group(cx: &Cx, group_id: String) -> Res {
     if group_id.trim_start().is_empty() {
-        cx.answer("Seems like you forgot group_id").send().await?;
+        cx.answer("Seems like you forgot to specify group_id").send().await?;
         return Ok(());
     }
 

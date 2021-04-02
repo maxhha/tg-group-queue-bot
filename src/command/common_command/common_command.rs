@@ -6,7 +6,7 @@ type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 
 pub async fn start(cx: &Cx, group_id: String) -> Result<(), Box<dyn Error + Send + Sync>> {
     if group_id.trim_start().is_empty() {
-        cx.answer("Seems like you forgot group_id").send().await?;
+        cx.answer("Seems like you forgot to specify group_id").send().await?;
         return Ok(());
     }
 
@@ -53,7 +53,7 @@ pub async fn name(cx: &Cx, username: String) -> Result<(), Box<dyn Error + Send 
 
 pub async fn push(cx: &Cx, subject: String, msg: String) -> Result<(), Box<dyn Error + Send + Sync>> {
     if subject.trim_start().is_empty() {
-        cx.answer("Seems like you forgot subject").send().await?;
+        cx.answer("Seems like you forgot to specify subject").send().await?;
 
         return Ok(());
     }
@@ -80,7 +80,7 @@ pub async fn push(cx: &Cx, subject: String, msg: String) -> Result<(), Box<dyn E
 
 pub async fn skip(cx: &Cx, subject: String) -> Result<(), Box<dyn Error + Send + Sync>> {
     if subject.trim_start().is_empty() {
-        cx.answer("Seems like you forgot subject").send().await?;
+        cx.answer("Seems like you forgot to specify subject").send().await?;
 
         return Ok(());
     }
