@@ -1,0 +1,111 @@
+use teloxide::prelude::*;
+
+use std::error::Error;
+
+type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
+
+pub async fn start(cx: &Cx, group_id: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if group_id.trim_start().is_empty() {
+        cx.answer("Seems like you forgot group_id").send().await?;
+        return Ok(());
+    }
+
+    match cx.update.from() {
+        Some(user) => {
+            let nickname = user.clone().username.expect("Must be user");
+            cx.answer(format!("@{} registered new group #{}.", nickname, group_id)).await?;
+        }
+        None => {
+            cx.answer("Use this command as common message").send().await?;
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn link(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
+    match cx.update.from() {
+        Some(user) => {
+            let nickname = user.clone().username.expect("Must be user");
+            cx.answer(format!("Your invite link is : {}", "")).send().await?;
+        }
+        None => {
+            cx.answer("Use this command as common message").send().await?;
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn name(cx: &Cx, username: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+    match cx.update.from() {
+        Some(user) => {
+            let nickname = user.clone().username.expect("Must be user");
+            cx.answer(format!("@{} registered as {}.", nickname, username)).send().await?;
+        }
+        None => {
+            cx.answer("Use this command as common message").send().await?;
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn push(cx: &Cx, subject: String, msg: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if subject.trim_start().is_empty() {
+        cx.answer("Seems like you forgot subject").send().await?;
+
+        return Ok(());
+    }
+
+    if msg.trim_start().is_empty() {
+        cx.answer("Seems like you forgot message").send().await?;
+
+        return Ok(());
+    }
+
+    match cx.update.from() {
+        Some(user) => {
+            let nickname = user.clone().username.expect("Must be user");
+            cx.answer(format!("@{} pushed to {} queue with msg {}.", nickname, subject, msg))
+                .await?;
+        }
+        None => {
+            cx.answer("Use this command as common message").send().await?;
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn skip(cx: &Cx, subject: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if subject.trim_start().is_empty() {
+        cx.answer("Seems like you forgot subject").send().await?;
+
+        return Ok(());
+    }
+
+    match cx.update.from() {
+        Some(user) => {
+            let nickname = user.clone().username.expect("Must be user");
+            cx.answer(format!("@{} skipped {} queue.", nickname, subject)).await?;
+        }
+        None => {
+            cx.answer("Use this command as common message").send().await?;
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn list(cx: &Cx, subject: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if subject.trim_start().is_empty() {
+        cx.answer("All active queues:").send().await?;
+
+        return Ok(());
+    }
+
+    cx.answer(format!("Queue for {} is.", subject)).await?;
+
+    Ok(())
+}
