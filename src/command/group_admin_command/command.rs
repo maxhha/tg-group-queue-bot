@@ -43,7 +43,7 @@ pub async fn pop(cx: &Cx, subject: String) -> Res {
     Ok(())
 }
 
-async fn skip(cx: &Cx, subject: String, username: String) -> Res {
+pub async fn skip(cx: &Cx, subject: String, username: String) -> Res {
     if subject.trim_start().is_empty() {
         cx.answer("Seems like you forgot to specify subject").send().await?;
         return Ok(());
