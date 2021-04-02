@@ -2,7 +2,7 @@ use teloxide::{prelude::*, utils::command::BotCommand};
 
 use std::error::Error;
 
-use crate::command::common_command::common_command::*;
+use crate::command::common_command::command::*;
 
 #[derive(BotCommand)]
 #[command(rename = "lowercase", description = "These commands are supported:")]

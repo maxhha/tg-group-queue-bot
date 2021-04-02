@@ -3,8 +3,9 @@ use teloxide::prelude::*;
 use std::error::Error;
 
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
+type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
-pub async fn start(cx: &Cx, group_id: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn start(cx: &Cx, group_id: String) -> Res {
     if group_id.trim_start().is_empty() {
         cx.answer("Seems like you forget to specify group_id").send().await?;
         return Ok(());
@@ -23,7 +24,7 @@ pub async fn start(cx: &Cx, group_id: String) -> Result<(), Box<dyn Error + Send
     Ok(())
 }
 
-pub async fn link(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn link(cx: &Cx) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
@@ -37,7 +38,7 @@ pub async fn link(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
     Ok(())
 }
 
-pub async fn name(cx: &Cx, username: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn name(cx: &Cx, username: String) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
@@ -51,7 +52,7 @@ pub async fn name(cx: &Cx, username: String) -> Result<(), Box<dyn Error + Send 
     Ok(())
 }
 
-pub async fn push(cx: &Cx, subject: String, msg: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
     if subject.trim_start().is_empty() {
         cx.answer("Seems like you forget to specify subject").send().await?;
 
@@ -78,7 +79,7 @@ pub async fn push(cx: &Cx, subject: String, msg: String) -> Result<(), Box<dyn E
     Ok(())
 }
 
-pub async fn skip(cx: &Cx, subject: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn skip(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
         cx.answer("Seems like you forget to specify subject").send().await?;
 
@@ -98,7 +99,7 @@ pub async fn skip(cx: &Cx, subject: String) -> Result<(), Box<dyn Error + Send +
     Ok(())
 }
 
-pub async fn list(cx: &Cx, subject: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn list(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
         cx.answer("All active queues:").send().await?;
 
