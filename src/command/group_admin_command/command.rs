@@ -96,7 +96,7 @@ pub async fn skip(cx: &Cx, subject: String, username: String) -> Res {
     Ok(())
 }
 
-pub async fn ban(cx: &Cx, username: String) -> Res {
+pub async fn total_ban(cx: &Cx, username: String) -> Res {
     if username.trim_start().is_empty() {
         cx.reply_to("Seems like you forget to specify username")
             .send()
