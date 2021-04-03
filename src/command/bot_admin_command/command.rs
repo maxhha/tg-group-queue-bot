@@ -7,7 +7,7 @@ type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
 pub async fn start(cx: &Cx, pwd: String) -> Res {
     if pwd.trim_start().is_empty() {
-        cx.answer("Seems like you specify empty password").send().await?;
+        cx.reply_to("Seems like you specify empty password").send().await?;
         return Ok(());
     }
 
@@ -32,7 +32,7 @@ pub async fn ls_groups(cx: &Cx) -> Res {
 
 pub async fn ls_group(cx: &Cx, group_id: String) -> Res {
     if group_id.trim_start().is_empty() {
-        cx.answer("Seems like you forget to specify group_id").send().await?;
+        cx.reply_to("Seems like you forget to specify group_id").send().await?;
         return Ok(());
     }
 
@@ -43,7 +43,7 @@ pub async fn ls_group(cx: &Cx, group_id: String) -> Res {
 
 pub async fn rm_group(cx: &Cx, group_id: String) -> Res {
     if group_id.trim_start().is_empty() {
-        cx.answer("Seems like you forget to specify group_id").send().await?;
+        cx.reply_to("Seems like you forget to specify group_id").send().await?;
         return Ok(());
     }
 
@@ -54,7 +54,7 @@ pub async fn rm_group(cx: &Cx, group_id: String) -> Res {
 
 pub async fn ban(cx: &Cx, username: String) -> Res {
     if username.trim_start().is_empty() {
-        cx.answer("Seems like you forget to specify username").send().await?;
+        cx.reply_to("Seems like you forget to specify username").send().await?;
         return Ok(());
     }
 

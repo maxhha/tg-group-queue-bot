@@ -7,7 +7,7 @@ type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
 pub async fn start(cx: &Cx, group_id: String) -> Res {
     if group_id.trim_start().is_empty() {
-        cx.answer("Seems like you forget to specify group_id").send().await?;
+        cx.reply_to("Seems like you forget to specify group_id").send().await?;
         return Ok(());
     }
 
@@ -54,13 +54,13 @@ pub async fn name(cx: &Cx, username: String) -> Res {
 
 pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.answer("Seems like you forget to specify subject").send().await?;
+        cx.reply_to("Seems like you forget to specify subject").send().await?;
 
         return Ok(());
     }
 
     if msg.trim_start().is_empty() {
-        cx.answer("Seems like you forgot message").send().await?;
+        cx.reply_to("Seems like you forgot message").send().await?;
 
         return Ok(());
     }
@@ -81,7 +81,7 @@ pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
 
 pub async fn skip(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.answer("Seems like you forget to specify subject").send().await?;
+        cx.reply_to("Seems like you forget to specify subject").send().await?;
 
         return Ok(());
     }
@@ -101,7 +101,7 @@ pub async fn skip(cx: &Cx, subject: String) -> Res {
 
 pub async fn list(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.answer("All active queues:").send().await?;
+        cx.reply_to("All active queues:").send().await?;
 
         return Ok(());
     }
