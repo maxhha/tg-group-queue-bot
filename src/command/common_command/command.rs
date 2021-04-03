@@ -7,17 +7,22 @@ type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
 pub async fn start(cx: &Cx, group_id: String) -> Res {
     if group_id.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify group_id").send().await?;
+        cx.reply_to("Seems like you forget to specify group_id")
+            .send()
+            .await?;
         return Ok(());
     }
 
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} registered new group #{}.", nickname, group_id)).await?;
+            cx.answer(format!("@{} registered new group #{}.", nickname, group_id))
+                .await?;
         }
         None => {
-            cx.answer("Use this command as common message").send().await?;
+            cx.answer("Use this command as common message")
+                .send()
+                .await?;
         }
     }
 
@@ -28,10 +33,14 @@ pub async fn link(cx: &Cx) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("Your invite link is : {}", "")).send().await?;
+            cx.answer(format!("Your invite link is : {}", ""))
+                .send()
+                .await?;
         }
         None => {
-            cx.answer("Use this command as common message").send().await?;
+            cx.answer("Use this command as common message")
+                .send()
+                .await?;
         }
     }
 
@@ -42,10 +51,14 @@ pub async fn name(cx: &Cx, username: String) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} registered as {}.", nickname, username)).send().await?;
+            cx.answer(format!("@{} registered as {}.", nickname, username))
+                .send()
+                .await?;
         }
         None => {
-            cx.answer("Use this command as common message").send().await?;
+            cx.answer("Use this command as common message")
+                .send()
+                .await?;
         }
     }
 
@@ -54,7 +67,9 @@ pub async fn name(cx: &Cx, username: String) -> Res {
 
 pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify subject").send().await?;
+        cx.reply_to("Seems like you forget to specify subject")
+            .send()
+            .await?;
 
         return Ok(());
     }
@@ -68,11 +83,16 @@ pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} pushed to {} queue with msg {}.", nickname, subject, msg))
-                .await?;
+            cx.answer(format!(
+                "@{} pushed to {} queue with msg {}.",
+                nickname, subject, msg
+            ))
+            .await?;
         }
         None => {
-            cx.answer("Use this command as common message").send().await?;
+            cx.answer("Use this command as common message")
+                .send()
+                .await?;
         }
     }
 
@@ -81,7 +101,9 @@ pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
 
 pub async fn skip(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify subject").send().await?;
+        cx.reply_to("Seems like you forget to specify subject")
+            .send()
+            .await?;
 
         return Ok(());
     }
@@ -89,10 +111,13 @@ pub async fn skip(cx: &Cx, subject: String) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} skipped {} queue.", nickname, subject)).await?;
+            cx.answer(format!("@{} skipped {} queue.", nickname, subject))
+                .await?;
         }
         None => {
-            cx.answer("Use this command as common message").send().await?;
+            cx.answer("Use this command as common message")
+                .send()
+                .await?;
         }
     }
 

@@ -27,7 +27,11 @@ type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 
 pub async fn answer(cx: Cx, command: Command) -> Result<(), Box<dyn Error + Send + Sync>> {
     match command {
-        Command::Help => cx.answer(Command::descriptions()).send().await.map(|_| ())?,
+        Command::Help => cx
+            .answer(Command::descriptions())
+            .send()
+            .await
+            .map(|_| ())?,
         Command::Start { group_id } => start(&cx, group_id).await?,
         Command::Link => link(&cx).await?,
         Command::Name { username } => name(&cx, username).await?,
