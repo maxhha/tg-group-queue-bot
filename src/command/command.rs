@@ -1,8 +1,11 @@
+use crate::utils::OptArg;
 use teloxide::{prelude::*, utils::command::BotCommand};
 
 use std::error::Error;
 
 use crate::command::common_command::command::*;
+
+type OptString = OptArg<String>;
 
 #[derive(BotCommand)]
 #[command(rename = "lowercase", description = "These commands are supported:")]
@@ -10,7 +13,7 @@ pub enum Command {
     #[command(description = "Display this message")]
     Help,
     #[command(description = "Add user to group or create new one")]
-    Start { group_id: String },
+    Start { group_id: OptString },
     #[command(description = "Get invite link")]
     Link,
     #[command(description = "Register user")]
@@ -32,7 +35,7 @@ pub async fn answer(cx: Cx, command: Command) -> Result<(), Box<dyn Error + Send
             .send()
             .await
             .map(|_| ())?,
-        Command::Start { group_id } => start(&cx, group_id).await?,
+        Command::Start { group_id } => start(&cx, group_id.into()).await?,
         Command::Link => link(&cx).await?,
         Command::Name { username } => name(&cx, username).await?,
         Command::Push { subject, msg } => push(&cx, subject, msg).await?,

@@ -5,25 +5,24 @@ use std::error::Error;
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
-pub async fn start(cx: &Cx, group_id: String) -> Res {
-    if group_id.trim_start().is_empty() {
+pub async fn start(cx: &Cx, group_id: Option<String>) -> Res {
+    if let Some(group_id) = group_id {
+        match cx.update.from() {
+            Some(user) => {
+                let nickname = user.clone().username.expect("Must be user");
+                cx.answer(format!("@{} registered new group #{}.", nickname, group_id))
+                    .await?;
+            }
+            None => {
+                cx.answer("Use this command as common message")
+                    .send()
+                    .await?;
+            }
+        }
+    } else {
         cx.reply_to("Seems like you forget to specify group_id")
             .send()
             .await?;
-        return Ok(());
-    }
-
-    match cx.update.from() {
-        Some(user) => {
-            let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} registered new group #{}.", nickname, group_id))
-                .await?;
-        }
-        None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
-        }
     }
 
     Ok(())

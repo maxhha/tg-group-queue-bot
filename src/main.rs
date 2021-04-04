@@ -1,6 +1,7 @@
 use teloxide::prelude::*;
 
 mod command;
+pub mod utils;
 use command::command::answer;
 
 #[tokio::main]
