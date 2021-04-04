@@ -14,6 +14,10 @@ impl<T: FromStr> FromStr for OptArg<T> {
     type Err = Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() == 0 {
+            return Ok(OptArg(None));
+        }
+
         Ok(OptArg(match T::from_str(s) {
             Ok(x) => Some(x),
             Err(_) => None,
