@@ -2,10 +2,14 @@ use teloxide::prelude::*;
 
 mod command;
 pub mod utils;
+
 use command::command::answer;
+use dotenv::dotenv;
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+
     run().await;
 }
 
