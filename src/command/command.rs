@@ -4,6 +4,8 @@ use teloxide::{prelude::*, utils::command::BotCommand};
 use std::error::Error;
 
 use crate::command::common_command::command::*;
+use crate::command::group_admin_command::command::*;
+use crate::command::bot_admin_command::command::*;
 
 type OptString = OptArg<String>;
 
@@ -27,6 +29,32 @@ pub enum Command {
     Skip { subject: String },
     #[command(description = "Show queue", parse_with = "split")]
     List { subject: String },
+
+    // Group admin commands
+
+    #[command(description = "Add subject to group", parse_with = "split")]
+    AddSubj { subject: String },
+    #[command(description = "Remove first user in queue", parse_with = "split")]
+    Pop { subject: String },
+    #[command(description = "Move first record to the end", parse_with = "split")]
+    Shift { subject: String, username: String },
+    #[command(description = "Ban specified user", parse_with = "split")]
+    Ban { username: String },
+    #[command(description = "Delete group", parse_with = "split")]
+    DeleteGroup { group_id: String },
+
+    // Bot admin commands
+
+    // #[command(description = "Add your self as bot admin", parse_with = "split")]
+    // Start { subject: String },
+    #[command(description = "Get list of all active groups", parse_with = "split")]
+    LsGroups,
+    #[command(description = "Get all info about specified group", parse_with = "split")]
+    LsGroup { id: String },
+    #[command(description = "delete specified group", parse_with = "split")]
+    RmGroup { id: String },
+    #[command(description = "Add specified user to blacklist", parse_with = "split")]
+    TotalBan { username: String },
 }
 
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
@@ -44,6 +72,15 @@ pub async fn answer(cx: Cx, command: Command) -> Result<(), Box<dyn Error + Send
         Command::Push { subject, msg } => push(&cx, subject, msg).await?,
         Command::Skip { subject } => skip(&cx, subject).await?,
         Command::List { subject } => list(&cx, subject).await?,
+        Command::AddSubj { subject } => add_subject(&cx, subject).await?,
+        Command::Pop { subject } => pop(&cx, subject).await?,
+        Command::Shift { subject, username } => shift(&cx, subject, username).await?,
+        Command::Ban { username } => ban(&cx, username).await?,
+        Command::DeleteGroup { group_id } => delete_group(&cx, group_id).await?,
+        Command::LsGroups {} => ls_groups(&cx).await?,
+        Command::LsGroup { id } => ls_group(&cx, id).await?,
+        Command::RmGroup { id } => rm_group(&cx, id).await?,
+        Command::TotalBan { username } => total_ban(&cx, username).await?,
     };
 
     Ok(())

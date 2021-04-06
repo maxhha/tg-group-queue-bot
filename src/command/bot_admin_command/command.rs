@@ -5,7 +5,7 @@ use std::error::Error;
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
-pub async fn start(cx: &Cx, pwd: String) -> Res {
+pub async fn adm_start(cx: &Cx, pwd: String) -> Res {
     if pwd.trim_start().is_empty() {
         cx.reply_to("Seems like you specify empty password")
             .send()

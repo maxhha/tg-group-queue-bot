@@ -59,7 +59,7 @@ pub async fn pop(cx: &Cx, subject: String) -> Res {
     Ok(())
 }
 
-pub async fn skip(cx: &Cx, subject: String, username: String) -> Res {
+pub async fn shift(cx: &Cx, subject: String, username: String) -> Res {
     if subject.trim_start().is_empty() {
         cx.reply_to("Seems like you forget to specify subject")
             .send()
