@@ -1,4 +1,5 @@
 use teloxide::prelude::*;
+use teloxide::utils::command::ParseError;
 
 use std::error::Error;
 
@@ -62,6 +63,20 @@ pub async fn name(cx: &Cx, username: String) -> Res {
     }
 
     Ok(())
+}
+
+pub fn parse_command_for_push(s: String) -> Result<(String, String), ParseError> {
+    let s = s.trim();
+
+    let words: Vec<&str> = s.splitn(2, ' ').collect();
+
+    if words.len() == 2 {
+        Ok((words[0].into(), words[1].into()))
+    } else {
+        Err(ParseError::IncorrectFormat(
+            "must be at least 2 arguments".into(),
+        ))
+    }
 }
 
 pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {

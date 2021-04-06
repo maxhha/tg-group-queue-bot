@@ -18,7 +18,10 @@ pub enum Command {
     Link,
     #[command(description = "Register user")]
     Name { username: String },
-    #[command(description = "Add user to queue", parse_with = "split")]
+    #[command(
+        description = "Add user to queue",
+        parse_with = "parse_command_for_push"
+    )]
     Push { subject: String, msg: String },
     #[command(description = "Skip first user into queue", parse_with = "split")]
     Skip { subject: String },
