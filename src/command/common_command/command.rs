@@ -68,15 +68,14 @@ pub async fn name(cx: &Cx, username: String) -> Res {
 pub fn parse_command_for_push(s: String) -> Result<(String, String), ParseError> {
     let s = s.trim();
 
-    let words: Vec<&str> = s.splitn(2, ' ').collect();
+    let space_idx = s.find(' ').ok_or(ParseError::IncorrectFormat(
+        "must be at least 2 arguments".into(),
+    ))?;
 
-    if words.len() == 2 {
-        Ok((words[0].into(), words[1].into()))
-    } else {
-        Err(ParseError::IncorrectFormat(
-            "must be at least 2 arguments".into(),
-        ))
-    }
+    let (subject, rest) = s.split_at(space_idx);
+    let message = rest.trim_start();
+
+    Ok((subject.into(), message.into()))
 }
 
 pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
