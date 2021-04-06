@@ -3,9 +3,9 @@ use teloxide::{prelude::*, utils::command::BotCommand};
 
 use std::error::Error;
 
+use crate::command::bot_admin_command::command::*;
 use crate::command::common_command::command::*;
 use crate::command::group_admin_command::command::*;
-use crate::command::bot_admin_command::command::*;
 
 type OptString = OptArg<String>;
 
@@ -31,7 +31,6 @@ pub enum Command {
     List { subject: String },
 
     // Group admin commands
-
     #[command(description = "Add subject to group", parse_with = "split")]
     AddSubj { subject: String },
     #[command(description = "Remove first user in queue", parse_with = "split")]
@@ -49,7 +48,10 @@ pub enum Command {
     // Start { subject: String },
     #[command(description = "Get list of all active groups", parse_with = "split")]
     LsGroups,
-    #[command(description = "Get all info about specified group", parse_with = "split")]
+    #[command(
+        description = "Get all info about specified group",
+        parse_with = "split"
+    )]
     LsGroup { id: String },
     #[command(description = "delete specified group", parse_with = "split")]
     RmGroup { id: String },
