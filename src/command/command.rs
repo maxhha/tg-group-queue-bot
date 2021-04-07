@@ -61,11 +61,7 @@ type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 
 pub async fn answer(cx: Cx, command: Command) -> Result<(), Box<dyn Error + Send + Sync>> {
     match command {
-        Command::Help => cx
-            .answer(Command::descriptions())
-            .send()
-            .await
-            .map(|_| ())?,
+        Command::Help => get_help_msg(&cx).await?,
         Command::Start { group_id } => start(&cx, group_id.into()).await?,
         Command::Link => link(&cx).await?,
         Command::Name { username } => name(&cx, username).await?,
@@ -82,6 +78,12 @@ pub async fn answer(cx: Cx, command: Command) -> Result<(), Box<dyn Error + Send
         Command::RmGroup { id } => rm_group(&cx, id).await?,
         Command::TotalBan { username } => total_ban(&cx, username).await?,
     };
+
+    Ok(())
+}
+
+async fn get_help_msg(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
+    cx.answer(Command::descriptions()).await?;
 
     Ok(())
 }
