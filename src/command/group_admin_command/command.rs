@@ -5,8 +5,8 @@ use std::error::Error;
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
-pub async fn add_subject(cx: &Cx, subject: String) -> Res {
-    if subject.trim_start().is_empty() {
+pub async fn add_subject(cx: &Cx, subject: Option<String>) -> Res {
+    if None == subject {
         cx.reply_to("Seems like you forget to specify subject")
             .await?;
         return Ok(());
@@ -17,9 +17,9 @@ pub async fn add_subject(cx: &Cx, subject: String) -> Res {
             let nickname = user.clone().username.expect("Must be user");
             cx.answer(format!(
                 "@{} registered new subject #{}.",
-                nickname, subject
+                nickname, subject.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -29,8 +29,8 @@ pub async fn add_subject(cx: &Cx, subject: String) -> Res {
     Ok(())
 }
 
-pub async fn pop(cx: &Cx, subject: String) -> Res {
-    if subject.trim_start().is_empty() {
+pub async fn pop(cx: &Cx, subject: Option<String>) -> Res {
+    if None == subject {
         cx.reply_to("Seems like you forget to specify subject")
             .await?;
         return Ok(());
@@ -41,9 +41,9 @@ pub async fn pop(cx: &Cx, subject: String) -> Res {
             let nickname = user.clone().username.expect("Must be user");
             cx.answer(format!(
                 "@{} popped first pos from #{} queue.",
-                nickname, subject
+                nickname, subject.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -53,8 +53,8 @@ pub async fn pop(cx: &Cx, subject: String) -> Res {
     Ok(())
 }
 
-pub async fn shift(cx: &Cx, subject: String, username: String) -> Res {
-    if subject.trim_start().is_empty() {
+pub async fn shift(cx: &Cx, subject: Option<String>, username: Option<String>) -> Res {
+    if None == subject {
         cx.reply_to("Seems like you forget to specify subject")
             .await?;
         return Ok(());
@@ -64,20 +64,20 @@ pub async fn shift(cx: &Cx, subject: String, username: String) -> Res {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
 
-            if username.trim_start().is_empty() {
+            if None == username {
                 cx.answer(format!(
                     "@{} skipped first pos in #{} queue.",
-                    nickname, subject
+                    nickname, subject.unwrap()
                 ))
-                .await?;
+                    .await?;
                 return Ok(());
             }
 
             cx.answer(format!(
                 "@{} skipped first @{} pos in #{} queue.",
-                nickname, username, subject
+                nickname, username.unwrap(), subject.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -87,8 +87,8 @@ pub async fn shift(cx: &Cx, subject: String, username: String) -> Res {
     Ok(())
 }
 
-pub async fn total_ban(cx: &Cx, username: String) -> Res {
-    if username.trim_start().is_empty() {
+pub async fn ban(cx: &Cx, username: Option<String>) -> Res {
+    if None == username {
         cx.reply_to("Seems like you forget to specify username")
             .await?;
         return Ok(());
@@ -100,9 +100,9 @@ pub async fn total_ban(cx: &Cx, username: String) -> Res {
 
             cx.answer(format!(
                 "@{} banned @{} and deleted him(her) from group.",
-                nickname, username
+                nickname, username.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -112,8 +112,8 @@ pub async fn total_ban(cx: &Cx, username: String) -> Res {
     Ok(())
 }
 
-pub async fn delete_group(cx: &Cx, group_id: String) -> Res {
-    if group_id.trim_start().is_empty() {
+pub async fn delete_group(cx: &Cx, group_id: Option<String>) -> Res {
+    if None == group_id {
         cx.reply_to("Seems like you forget to specify group_id")
             .await?;
         return Ok(());
@@ -123,7 +123,7 @@ pub async fn delete_group(cx: &Cx, group_id: String) -> Res {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
 
-            cx.answer(format!("@{} deleted #{} group.", nickname, group_id))
+            cx.answer(format!("@{} deleted #{} group.", nickname, group_id.unwrap()))
                 .await?;
         }
         None => {
