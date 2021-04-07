@@ -110,8 +110,12 @@ pub async fn skip(cx: &Cx, subject: Option<String>) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} skipped #{} queue.", nickname, subject.unwrap()))
-                .await?;
+            cx.answer(format!(
+                "@{} skipped #{} queue.",
+                nickname,
+                subject.unwrap()
+            ))
+            .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
