@@ -15,15 +15,11 @@ pub async fn start(cx: &Cx, group_id: Option<String>) -> Res {
                     .await?;
             }
             None => {
-                cx.answer("Use this command as common message")
-                    .send()
-                    .await?;
+                cx.answer("Use this command as common message").await?;
             }
         }
     } else {
-        cx.reply_to("Seems like you forget to specify group_id")
-            .send()
-            .await?;
+        cx.reply_to("Seems like you forget to specify group_id").await?;
     }
 
     Ok(())
@@ -33,14 +29,10 @@ pub async fn link(cx: &Cx) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("Your invite link is : {}", ""))
-                .send()
-                .await?;
+            cx.answer(format!("Your invite link is : {}", "")).await?;
         }
         None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
+            cx.answer("Use this command as common message").await?;
         }
     }
 
@@ -51,14 +43,10 @@ pub async fn name(cx: &Cx, username: String) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} registered as {}.", nickname, username))
-                .send()
-                .await?;
+            cx.answer(format!("@{} registered as {}.", nickname, username)).await?;
         }
         None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
+            cx.answer("Use this command as common message").await?;
         }
     }
 
@@ -80,15 +68,13 @@ pub fn parse_command_for_push(s: String) -> Result<(String, String), ParseError>
 
 pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify subject")
-            .send()
-            .await?;
+        cx.reply_to("Seems like you forget to specify subject").await?;
 
         return Ok(());
     }
 
     if msg.trim_start().is_empty() {
-        cx.reply_to("Seems like you forgot message").send().await?;
+        cx.reply_to("Seems like you forgot message").await?;
 
         return Ok(());
     }
@@ -103,9 +89,7 @@ pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
             .await?;
         }
         None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
+            cx.answer("Use this command as common message").await?;
         }
     }
 
@@ -114,9 +98,7 @@ pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
 
 pub async fn skip(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify subject")
-            .send()
-            .await?;
+        cx.reply_to("Seems like you forget to specify subject").await?;
 
         return Ok(());
     }
@@ -128,9 +110,7 @@ pub async fn skip(cx: &Cx, subject: String) -> Res {
                 .await?;
         }
         None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
+            cx.answer("Use this command as common message").await?;
         }
     }
 
@@ -139,7 +119,7 @@ pub async fn skip(cx: &Cx, subject: String) -> Res {
 
 pub async fn list(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("All active queues:").send().await?;
+        cx.reply_to("All active queues:").await?;
 
         return Ok(());
     }

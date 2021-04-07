@@ -7,9 +7,7 @@ type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
 pub async fn add_subject(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify subject")
-            .send()
-            .await?;
+        cx.reply_to("Seems like you forget to specify subject").await?;
         return Ok(());
     }
 
@@ -23,9 +21,7 @@ pub async fn add_subject(cx: &Cx, subject: String) -> Res {
             .await?;
         }
         None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
+            cx.answer("Use this command as common message").await?;
         }
     }
 
@@ -34,9 +30,7 @@ pub async fn add_subject(cx: &Cx, subject: String) -> Res {
 
 pub async fn pop(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify subject")
-            .send()
-            .await?;
+        cx.reply_to("Seems like you forget to specify subject").await?;
         return Ok(());
     }
 
@@ -50,9 +44,7 @@ pub async fn pop(cx: &Cx, subject: String) -> Res {
             .await?;
         }
         None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
+            cx.answer("Use this command as common message").await?;
         }
     }
 
@@ -61,9 +53,7 @@ pub async fn pop(cx: &Cx, subject: String) -> Res {
 
 pub async fn shift(cx: &Cx, subject: String, username: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify subject")
-            .send()
-            .await?;
+        cx.reply_to("Seems like you forget to specify subject").await?;
         return Ok(());
     }
 
@@ -87,9 +77,7 @@ pub async fn shift(cx: &Cx, subject: String, username: String) -> Res {
             .await?;
         }
         None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
+            cx.answer("Use this command as common message").await?;
         }
     }
 
@@ -98,9 +86,7 @@ pub async fn shift(cx: &Cx, subject: String, username: String) -> Res {
 
 pub async fn total_ban(cx: &Cx, username: String) -> Res {
     if username.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify username")
-            .send()
-            .await?;
+        cx.reply_to("Seems like you forget to specify username").await?;
         return Ok(());
     }
 
@@ -115,9 +101,7 @@ pub async fn total_ban(cx: &Cx, username: String) -> Res {
             .await?;
         }
         None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
+            cx.answer("Use this command as common message").await?;
         }
     }
 
@@ -126,9 +110,7 @@ pub async fn total_ban(cx: &Cx, username: String) -> Res {
 
 pub async fn delete_group(cx: &Cx, group_id: String) -> Res {
     if group_id.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify group_id")
-            .send()
-            .await?;
+        cx.reply_to("Seems like you forget to specify group_id").await?;
         return Ok(());
     }
 
@@ -140,9 +122,7 @@ pub async fn delete_group(cx: &Cx, group_id: String) -> Res {
                 .await?;
         }
         None => {
-            cx.answer("Use this command as common message")
-                .send()
-                .await?;
+            cx.answer("Use this command as common message").await?;
         }
     }
 
