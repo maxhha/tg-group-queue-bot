@@ -85,7 +85,7 @@ pub async fn push(cx: &Cx, subject: Option<String>, msg: Option<String>) -> Res 
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
             cx.answer(format!(
-                "@{} pushed to {} queue with msg {}.",
+                "@{} pushed to #{} queue with msg {}.",
                 nickname,
                 subject.unwrap(),
                 msg.unwrap()
@@ -110,7 +110,7 @@ pub async fn skip(cx: &Cx, subject: Option<String>) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} skipped {} queue.", nickname, subject.unwrap()))
+            cx.answer(format!("@{} skipped #{} queue.", nickname, subject.unwrap()))
                 .await?;
         }
         None => {
