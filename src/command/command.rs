@@ -1,13 +1,13 @@
-use crate::utils::OptArg;
 use crate::utils::opt_arg::args_parser;
+use crate::utils::OptArg;
 
 use teloxide::{prelude::*, utils::command::BotCommand};
 
 use std::error::Error;
 
+use crate::command::bot_admin_command::command::*;
 use crate::command::common_command::command::*;
 use crate::command::group_admin_command::command::*;
-use crate::command::bot_admin_command::command::*;
 
 type OptString = OptArg<String>;
 
@@ -16,7 +16,10 @@ type OptString = OptArg<String>;
 pub enum Command {
     #[command(description = "Display this message", parse_with = "args_parser")]
     Help,
-    #[command(description = "Add user to group or create new one", parse_with = "args_parser")]
+    #[command(
+        description = "Add user to group or create new one",
+        parse_with = "args_parser"
+    )]
     Start { group_id: OptString },
     #[command(description = "Get invite link", parse_with = "args_parser")]
     Link,
@@ -34,8 +37,14 @@ pub enum Command {
     AddSubj { subject: OptString },
     #[command(description = "Remove first user in queue", parse_with = "args_parser")]
     Pop { subject: OptString },
-    #[command(description = "Move first record to the end", parse_with = "args_parser")]
-    Shift { subject: OptString, username: OptString },
+    #[command(
+        description = "Move first record to the end",
+        parse_with = "args_parser"
+    )]
+    Shift {
+        subject: OptString,
+        username: OptString,
+    },
     #[command(description = "Ban specified user", parse_with = "args_parser")]
     Ban { username: OptString },
     #[command(description = "Delete group", parse_with = "args_parser")]
@@ -44,7 +53,10 @@ pub enum Command {
     // Bot admin commands
     // #[command(description = "Add your self as bot admin", parse_with = "split")]
     // Start { subject: String },
-    #[command(description = "Get list of all active groups", parse_with = "args_parser")]
+    #[command(
+        description = "Get list of all active groups",
+        parse_with = "args_parser"
+    )]
     LsGroups,
     #[command(
         description = "Get all info about specified group",
@@ -53,7 +65,10 @@ pub enum Command {
     LsGroup { id: OptString },
     #[command(description = "delete specified group", parse_with = "args_parser")]
     RmGroup { id: OptString },
-    #[command(description = "Add specified user to blacklist", parse_with = "args_parser")]
+    #[command(
+        description = "Add specified user to blacklist",
+        parse_with = "args_parser"
+    )]
     TotalBan { username: OptString },
 }
 

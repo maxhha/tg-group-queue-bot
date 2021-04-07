@@ -15,8 +15,12 @@ pub async fn start(cx: &Cx, group_id: Option<String>) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} registered new group #{}.", nickname, group_id.unwrap()))
-                .await?;
+            cx.answer(format!(
+                "@{} registered new group #{}.",
+                nickname,
+                group_id.unwrap()
+            ))
+            .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -50,8 +54,12 @@ pub async fn name(cx: &Cx, username: Option<String>) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} registered as {}.", nickname, username.unwrap()))
-                .await?;
+            cx.answer(format!(
+                "@{} registered as {}.",
+                nickname,
+                username.unwrap()
+            ))
+            .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -78,9 +86,11 @@ pub async fn push(cx: &Cx, subject: Option<String>, msg: Option<String>) -> Res 
             let nickname = user.clone().username.expect("Must be user");
             cx.answer(format!(
                 "@{} pushed to {} queue with msg {}.",
-                nickname, subject.unwrap(), msg.unwrap()
+                nickname,
+                subject.unwrap(),
+                msg.unwrap()
             ))
-                .await?;
+            .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -117,7 +127,8 @@ pub async fn list(cx: &Cx, subject: Option<String>) -> Res {
         return Ok(());
     }
 
-    cx.answer(format!("Queue for {} is.", subject.unwrap())).await?;
+    cx.answer(format!("Queue for {} is.", subject.unwrap()))
+        .await?;
 
     Ok(())
 }

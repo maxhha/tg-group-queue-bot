@@ -27,13 +27,25 @@ impl<T: FromStr> FromStr for OptArg<T> {
 }
 
 pub fn args_parser(s: String) -> Result<(OptArg<String>, OptArg<String>), ParseError> {
-    let vec = s.trim().split(" ").skip_while(|&x| x.is_empty()).collect::<Vec<&str>>();
+    let vec = s
+        .trim()
+        .split(" ")
+        .skip_while(|&x| x.is_empty())
+        .collect::<Vec<&str>>();
 
     // TODO Rewrite this part to smth more functional and readable
     match vec.len() {
         0 => return Ok((OptArg(None), OptArg(None))),
         1 => return Ok((OptArg(Some(vec[0].to_string())), OptArg(None))),
-        2 => return Ok((OptArg(Some(vec[0].to_string())), OptArg(Some(vec[1].to_string())))),
-        _ => Ok((OptArg(Some(vec[0].to_string())), OptArg(Some(vec[1].to_string()))))
+        2 => {
+            return Ok((
+                OptArg(Some(vec[0].to_string())),
+                OptArg(Some(vec[1].to_string())),
+            ))
+        }
+        _ => Ok((
+            OptArg(Some(vec[0].to_string())),
+            OptArg(Some(vec[1].to_string())),
+        )),
     }
 }

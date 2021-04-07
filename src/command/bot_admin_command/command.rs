@@ -37,7 +37,8 @@ pub async fn ls_group(cx: &Cx, group_id: Option<String>) -> Res {
         return Ok(());
     }
 
-    cx.answer(format!("Group #{} info:", group_id.unwrap())).await?;
+    cx.answer(format!("Group #{} info:", group_id.unwrap()))
+        .await?;
 
     Ok(())
 }
@@ -49,7 +50,8 @@ pub async fn rm_group(cx: &Cx, group_id: Option<String>) -> Res {
         return Ok(());
     }
 
-    cx.answer(format!("Group #{} deleted:", group_id.unwrap())).await?;
+    cx.answer(format!("Group #{} deleted:", group_id.unwrap()))
+        .await?;
 
     Ok(())
 }
@@ -61,7 +63,8 @@ pub async fn total_ban(cx: &Cx, username: Option<String>) -> Res {
         return Ok(());
     }
 
-    cx.answer(format!("User {} banned:", username.unwrap())).await?;
+    cx.answer(format!("User {} banned:", username.unwrap()))
+        .await?;
 
     Ok(())
 }
