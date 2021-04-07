@@ -19,7 +19,8 @@ pub async fn start(cx: &Cx, group_id: Option<String>) -> Res {
             }
         }
     } else {
-        cx.reply_to("Seems like you forget to specify group_id").await?;
+        cx.reply_to("Seems like you forget to specify group_id")
+            .await?;
     }
 
     Ok(())
@@ -43,7 +44,8 @@ pub async fn name(cx: &Cx, username: String) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} registered as {}.", nickname, username)).await?;
+            cx.answer(format!("@{} registered as {}.", nickname, username))
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -68,7 +70,8 @@ pub fn parse_command_for_push(s: String) -> Result<(String, String), ParseError>
 
 pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify subject").await?;
+        cx.reply_to("Seems like you forget to specify subject")
+            .await?;
 
         return Ok(());
     }
@@ -98,7 +101,8 @@ pub async fn push(cx: &Cx, subject: String, msg: String) -> Res {
 
 pub async fn skip(cx: &Cx, subject: String) -> Res {
     if subject.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify subject").await?;
+        cx.reply_to("Seems like you forget to specify subject")
+            .await?;
 
         return Ok(());
     }

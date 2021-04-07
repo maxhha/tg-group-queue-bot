@@ -33,7 +33,8 @@ pub async fn ls_groups(cx: &Cx) -> Res {
 
 pub async fn ls_group(cx: &Cx, group_id: String) -> Res {
     if group_id.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify group_id").await?;
+        cx.reply_to("Seems like you forget to specify group_id")
+            .await?;
         return Ok(());
     }
 
@@ -44,7 +45,8 @@ pub async fn ls_group(cx: &Cx, group_id: String) -> Res {
 
 pub async fn rm_group(cx: &Cx, group_id: String) -> Res {
     if group_id.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify group_id").await?;
+        cx.reply_to("Seems like you forget to specify group_id")
+            .await?;
         return Ok(());
     }
 
@@ -55,7 +57,8 @@ pub async fn rm_group(cx: &Cx, group_id: String) -> Res {
 
 pub async fn ban(cx: &Cx, username: String) -> Res {
     if username.trim_start().is_empty() {
-        cx.reply_to("Seems like you forget to specify username").await?;
+        cx.reply_to("Seems like you forget to specify username")
+            .await?;
         return Ok(());
     }
 
