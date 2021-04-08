@@ -8,6 +8,8 @@ use std::error::Error;
 use crate::command::bot_admin_command::*;
 use crate::command::common_command::*;
 use crate::command::group_admin_command::*;
+use mongodb::Database;
+use std::sync::Arc;
 
 type OptString = OptArg<String>;
 
@@ -72,9 +74,10 @@ pub enum Command {
     TotalBan { username: OptString },
 }
 
-type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
+pub type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
+pub type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
-pub async fn answer(cx: Cx, command: Command) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub async fn answer(cx: Cx, command: Command, db: Arc<Database>) -> Res {
     match command {
         Command::Help => get_help_msg(&cx).await?,
         Command::Start { group_id } => start(&cx, group_id.into()).await?,

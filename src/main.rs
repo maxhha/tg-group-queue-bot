@@ -3,53 +3,42 @@ use teloxide::prelude::*;
 mod command;
 pub mod utils;
 
-use command::command::answer;
+use command::*;
 use dotenv::dotenv;
-use mongodb::{options::ClientOptions, Client};
+use mongodb::{options::ClientOptions, Client, Database};
+use std::sync::Arc;
 use tokio_compat_02::FutureExt;
 
 #[tokio::main]
 async fn main() {
     dotenv().ok();
 
-    // // Parse a connection string into an options struct.
-    // let mongodb_uri = String::from("mongodb://cluster-shard-00-00.bwags.mongodb.net:27017, \
-    //     mongodb://cluster-shard-00-01.bwags.mongodb.net:27017, \
-    //     mongodb://cluster-shard-00-02.bwags.mongodb.net:27017/");
-
-    // let opts = ClientOptions::
-
-    let mut client_options = ClientOptions::parse(
-        "mongodb+srv://bot:<password>@cluster.bwags.mongodb.net/develop?retryWrites=true&w=majority",
+    let mut options = ClientOptions::parse(
+        "mongodb+srv://bot:<password>@cluster.bwags.mongodb\
+        .net/develop?retryWrites=true&w=majority",
     )
     .compat()
     .await
     .unwrap();
 
-    // Manually set an option.
-    client_options.app_name = Some("tg-queue-bot".to_string());
+    options.app_name = Some("tg-queue-bot".to_string());
 
-    println!("Create client");
+    let client = Client::with_options(options).unwrap();
 
-    // Get a handle to the deployment.
-    let client = Client::with_options(client_options).unwrap();
-    println!("query database");
-    let db = client.database("develop");
-    println!("query collections");
+    let db = Arc::new(client.database("develop"));
 
-    for collection_name in db.list_collection_names(None).compat().await.unwrap() {
-        println!(" - {}", collection_name);
-    }
-
-    // run().await;
+    run(db.clone()).await;
 }
 
-async fn run() {
+async fn run(db: Arc<Database>) {
     teloxide::enable_logging!();
     log::info!("Starting group-queue ...");
 
     let bot = Bot::from_env().auto_send();
 
     let bot_name: String = "group-queue".to_string();
-    teloxide::commands_repl(bot, bot_name, answer).await;
+    teloxide::commands_repl(bot, bot_name, move |cx: Cx, command: Command| {
+        answer(cx, command, db.clone())
+    })
+    .await
 }
