@@ -6,6 +6,7 @@ pub mod utils;
 use command::*;
 use dotenv::dotenv;
 use mongodb::{options::ClientOptions, Client, Database};
+use std::env;
 use std::sync::Arc;
 use tokio_compat_02::FutureExt;
 
@@ -13,13 +14,10 @@ use tokio_compat_02::FutureExt;
 async fn main() {
     dotenv().ok();
 
-    let mut options = ClientOptions::parse(
-        "mongodb+srv://bot:<password>@cluster.bwags.mongodb\
-        .net/develop?retryWrites=true&w=majority",
-    )
-    .compat()
-    .await
-    .unwrap();
+    let mut options = ClientOptions::parse(env::var("MONGO_DSL").unwrap().as_str())
+        .compat()
+        .await
+        .unwrap();
 
     options.app_name = Some("tg-queue-bot".to_string());
 
