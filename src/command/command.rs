@@ -10,6 +10,7 @@ use crate::command::common_command::*;
 use crate::command::group_admin_command::*;
 use mongodb::Database;
 use std::sync::Arc;
+use crate::database::MongoDB;
 
 type OptString = OptArg<String>;
 
@@ -77,7 +78,7 @@ pub enum Command {
 pub type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 pub type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
-pub async fn answer(cx: Cx, command: Command, db: Arc<Database>) -> Res {
+pub async fn answer(cx: Cx, command: Command, db: Arc<MongoDB>) -> Res {
     match command {
         Command::Help => get_help_msg(&cx).await?,
         Command::Start { group_id } => start(&cx, group_id.into()).await?,

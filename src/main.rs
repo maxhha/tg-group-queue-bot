@@ -16,21 +16,13 @@ use tokio_compat_02::FutureExt;
 async fn main() {
     dotenv().ok();
 
-    let mut options = ClientOptions::parse(env::var("MONGO_DSL").unwrap().as_str())
-        .compat()
-        .await
-        .unwrap();
-
-    options.app_name = Some(env::var("BOT_NAME").unwrap());
-
-    let client = Client::with_options(options).unwrap();
-
-    let db = Arc::new(client.database(env::var("DB_NAME").unwrap().as_str()));
+    let database = MongoDB::new().await;
+    let db = Arc::new(database.unwrap());
 
     run(db.clone()).await;
 }
 
-async fn run(db: Arc<Database>) {
+async fn run(db: Arc<MongoDB>) {
     teloxide::enable_logging!();
     log::info!("Starting group-queue ...");
 
