@@ -1,9 +1,11 @@
 use teloxide::prelude::*;
 
 mod command;
+mod database;
 pub mod utils;
 
 use command::*;
+use database::*;
 use dotenv::dotenv;
 use mongodb::{options::ClientOptions, Client, Database};
 use std::env;
@@ -19,11 +21,11 @@ async fn main() {
         .await
         .unwrap();
 
-    options.app_name = Some("tg-queue-bot".to_string());
+    options.app_name = Some(env::var("BOT_NAME").unwrap());
 
     let client = Client::with_options(options).unwrap();
 
-    let db = Arc::new(client.database("develop"));
+    let db = Arc::new(client.database(env::var("DB_NAME").unwrap().as_str()));
 
     run(db.clone()).await;
 }
