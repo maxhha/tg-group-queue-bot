@@ -1,7 +1,7 @@
-use mongodb::{Client, options::ClientOptions};
-use tokio_compat_02::FutureExt;
+use mongodb::{options::ClientOptions, Client};
 use std::env;
 use std::future::Future;
+use tokio_compat_02::FutureExt;
 
 // trait Database {
 //     fn new() -> Box<dyn Future<Output=Result<Self, Box<dyn std::error::Error>>>>;
