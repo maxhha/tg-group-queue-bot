@@ -5,9 +5,9 @@ use teloxide::{prelude::*, utils::command::BotCommand};
 
 use std::error::Error;
 
-use crate::command::bot_admin_command::command::*;
-use crate::command::common_command::command::*;
-use crate::command::group_admin_command::command::*;
+use crate::command::bot_admin_command::*;
+use crate::command::common_command::*;
+use crate::command::group_admin_command::*;
 
 type OptString = OptArg<String>;
 
