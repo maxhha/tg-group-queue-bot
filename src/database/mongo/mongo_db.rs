@@ -1,6 +1,8 @@
+use crate::database::Database;
 use mongodb::{options::ClientOptions, Client};
 use std::env;
 use tokio_compat_02::FutureExt;
+// use async_trait::async_trait;
 
 pub struct MongoDB {
     database: mongodb::Database,
@@ -23,3 +25,5 @@ impl MongoDB {
         })
     }
 }
+
+impl Database for MongoDB {}

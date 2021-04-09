@@ -1,6 +1,6 @@
 // use async_trait::async_trait;
 
 // #[async_trait]
-// trait Database {
-//     async fn new() -> Result<Database, Box<dyn std::error::Error>>;
-// }
+pub trait Database {
+    //     async fn new() -> Result<Database, Box<dyn std::error::Error>>;
+}
