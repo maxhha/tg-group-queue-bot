@@ -8,7 +8,6 @@ pub struct MongoDB {
     database: mongodb::Database,
 }
 
-// #[async_trait]
 impl MongoDB {
     pub async fn new() -> Result<MongoDB, Box<dyn std::error::Error>> {
         let mut options = ClientOptions::parse(env::var("MONGO_DSL").unwrap().as_str())

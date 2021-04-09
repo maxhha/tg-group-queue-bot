@@ -1,5 +1,6 @@
 use crate::utils::opt_arg::args_parser;
 use crate::utils::OptArg;
+use tokio::sync::Mutex;
 
 use teloxide::{prelude::*, utils::command::BotCommand};
 
@@ -8,8 +9,7 @@ use std::error::Error;
 use crate::command::bot_admin_command::*;
 use crate::command::common_command::*;
 use crate::command::group_admin_command::*;
-use crate::database::MongoDB;
-use mongodb::Database;
+use crate::database::Database;
 use std::sync::Arc;
 
 type OptString = OptArg<String>;
@@ -78,7 +78,8 @@ pub enum Command {
 pub type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 pub type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
-pub async fn answer(cx: Cx, command: Command, db: Arc<MongoDB>) -> Res {
+pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res {
+    let db = db.clone();
     match command {
         Command::Help => get_help_msg(&cx).await?,
         Command::Start { group_id } => start(&cx, group_id.into()).await?,

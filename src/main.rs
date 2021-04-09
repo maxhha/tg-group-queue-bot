@@ -7,22 +7,20 @@ pub mod utils;
 use command::*;
 use database::*;
 use dotenv::dotenv;
-use mongodb::{options::ClientOptions, Client, Database};
 use std::env;
 use std::sync::Arc;
-use tokio_compat_02::FutureExt;
 
 #[tokio::main]
 async fn main() {
     dotenv().ok();
 
-    let database = MongoDB::new().await;
-    let db = Arc::new(database.unwrap());
+    let database = new_database().await;
+    let db = database.unwrap();
 
     run(db.clone()).await;
 }
 
-async fn run(db: Arc<MongoDB>) {
+async fn run(db: Box<dyn Database>) {
     teloxide::enable_logging!();
     log::info!("Starting group-queue ...");
 
