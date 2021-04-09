@@ -1,0 +1,31 @@
+name: Rust
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+     - uses: actions/checkout@v2
+     - name: rust-rustfmt-check
+       uses: mbrobbel/rustfmt-check@0.3.0
+       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v1.0.1
+    - name: Build
+      run: cargo build
+    - name: Run tests
+      run: cargo test --verbose
