@@ -8,9 +8,9 @@ use std::error::Error;
 use crate::command::bot_admin_command::*;
 use crate::command::common_command::*;
 use crate::command::group_admin_command::*;
+use crate::database::MongoDB;
 use mongodb::Database;
 use std::sync::Arc;
-use crate::database::MongoDB;
 
 type OptString = OptArg<String>;
 
