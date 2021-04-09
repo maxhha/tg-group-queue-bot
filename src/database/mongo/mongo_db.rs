@@ -20,7 +20,7 @@ impl MongoDB {
         let client = Client::with_options(options).unwrap();
 
         Ok(MongoDB {
-            database: client.database(env::var("DB_NAME").unwrap().as_str()),
+            database: client.database(env::var("DATABASE_NAME").unwrap().as_str()),
         })
     }
 }

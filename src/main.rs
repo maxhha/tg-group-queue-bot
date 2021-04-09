@@ -14,13 +14,16 @@ use std::sync::Arc;
 async fn main() {
     dotenv().ok();
 
-    let database = new_database().await;
-    let db = database.unwrap();
+    let database = Arc::new(
+        new_database()
+            .await
+            .expect("Failed to create database client"),
+    );
 
-    run(db.clone()).await;
+    run(database.clone()).await;
 }
 
-async fn run(db: Box<dyn Database>) {
+async fn run(db: Arc<Box<dyn Database>>) {
     teloxide::enable_logging!();
     log::info!("Starting group-queue ...");
 

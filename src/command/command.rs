@@ -79,7 +79,6 @@ pub type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 pub type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
 pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res {
-    let db = db.clone();
     match command {
         Command::Help => get_help_msg(&cx).await?,
         Command::Start { group_id } => start(&cx, group_id.into()).await?,
