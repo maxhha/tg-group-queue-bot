@@ -1,16 +1,21 @@
 use teloxide::prelude::*;
 
+use data_encoding::BASE64;
+use ring::digest::{digest, SHA512};
 use std::error::Error;
 
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
-pub async fn adm_start(cx: &Cx, pwd: Option<String>) -> Res {
-    if None == pwd {
-        cx.reply_to("Seems like you specify empty password").await?;
-        return Ok(());
-    }
+pub fn is_admin_password(pass: &String) -> bool {
+    let hash = BASE64.encode(digest(&SHA512, pass.as_bytes()).as_ref());
+    let true_hash = std::env::var("ADMIN_PASSWORD_HASH")
+        .expect("No ADMIN_PASSWORD_HASH was provided in environment");
 
+    hash == true_hash
+}
+
+pub async fn adm_start(cx: &Cx) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");

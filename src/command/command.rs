@@ -1,6 +1,5 @@
 use crate::utils::opt_arg::args_parser;
 use crate::utils::OptArg;
-use tokio::sync::Mutex;
 
 use teloxide::{prelude::*, utils::command::BotCommand};
 
@@ -81,7 +80,17 @@ pub type Res = Result<(), Box<dyn Error + Send + Sync>>;
 pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res {
     match command {
         Command::Help => get_help_msg(&cx).await?,
-        Command::Start { group_id } => start(&cx, group_id.into()).await?,
+        Command::Start { group_id } => {
+            let group_id: Option<String> = group_id.into();
+
+            if let Some(s) = &group_id {
+                if is_admin_password(s) {
+                    return adm_start(&cx).await;
+                }
+            }
+
+            start(&cx, group_id).await?
+        }
         Command::Link => link(&cx).await?,
         Command::Name { username } => name(&cx, username.into()).await?,
         Command::Push { subject, msg } => push(&cx, subject.into(), msg.into()).await?,
