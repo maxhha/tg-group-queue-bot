@@ -81,7 +81,7 @@ impl Database for MongoDB {
     }
 
     async fn is_admin(&self, id: i64) -> Result<bool, Box<dyn Error + Send + Sync>> {
-        let user = self
+        let user: Option<mongodb::bson::Document> = self
             .database
             .collection("admins")
             .find_one(doc! { "_id": id }, None)
