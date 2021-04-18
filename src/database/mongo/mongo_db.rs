@@ -4,6 +4,44 @@ use std::env;
 use tokio_compat_02::FutureExt;
 // use async_trait::async_trait;
 
+/// ## Database structure
+/// ```graphql
+///
+/// scalar TelegramID
+///
+/// type Database {
+///     groups: [Group!]!
+///     queues: [Queue!]!
+///     globalBans: [TelegramID!]!
+///     admins: [TelegramID!]!
+/// }
+///
+/// type Group {
+///     id: ID!
+///     owner: TelegramID!
+///     members: [Member!]!
+///     queues: [ID!]!
+///     bans: [TelegramID!]!
+/// }
+///
+/// type Member {
+///     id: TelegramID!
+///     name: String
+/// }
+///
+/// type Queue {
+///     id: ID!
+///     groupId: ID!
+///     name: String!
+///     records: [QueueRecord!]!
+/// }
+///
+/// type QueueRecord {
+///     user: TelegramID!
+///     message: String!
+/// }
+///
+/// ```
 pub struct MongoDB {
     database: mongodb::Database,
 }
