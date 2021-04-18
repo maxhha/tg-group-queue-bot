@@ -79,4 +79,14 @@ impl Database for MongoDB {
             .await?;
         Ok(())
     }
+
+    async fn is_admin(&self, id: i64) -> Result<bool, Box<dyn Error + Send + Sync>> {
+        let user = self
+            .database
+            .collection("admins")
+            .find_one(doc! { "_id": id }, None)
+            .await?;
+
+        Ok(user.is_some())
+    }
 }

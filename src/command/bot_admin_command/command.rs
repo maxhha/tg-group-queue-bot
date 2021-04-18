@@ -21,11 +21,17 @@ pub fn is_admin_password(pass: &String) -> bool {
 pub async fn adm_start(cx: &Cx, db: &DB) -> Res {
     match cx.update.from() {
         Some(user) => {
-            db.add_admin(user.id).await?;
-
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} registered as bot admin.", nickname))
-                .await?;
+
+            if db.is_admin(user.id).await? {
+                cx.answer(format!("@{} is already admin.", nickname))
+                    .await?;
+            } else {
+                db.add_admin(user.id).await?;
+
+                cx.answer(format!("@{} registered as bot admin.", nickname))
+                    .await?;
+            }
         }
         None => {
             cx.answer("Use this command as common message").await?;
