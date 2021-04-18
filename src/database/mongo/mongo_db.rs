@@ -1,23 +1,25 @@
 use crate::database::Database;
+use async_trait::async_trait;
+use mongodb::bson::doc;
 use mongodb::{options::ClientOptions, Client};
 use std::env;
+use std::error::Error;
 use tokio_compat_02::FutureExt;
-// use async_trait::async_trait;
 
 /// ## Database structure
 /// ```graphql
 ///
-/// scalar TelegramID
+/// scalar TelegramID # i64 rust type
 ///
 /// type Database {
 ///     groups: [Group!]!
 ///     queues: [Queue!]!
-///     globalBans: [TelegramID!]!
-///     admins: [TelegramID!]!
+///     globalBans: [TelegramUser!]!
+///     admins: [TelegramUser!]!
 /// }
 ///
 /// type Group {
-///     id: ID!
+///     _id: ID!
 ///     owner: TelegramID!
 ///     members: [Member!]!
 ///     queues: [ID!]!
@@ -30,7 +32,7 @@ use tokio_compat_02::FutureExt;
 /// }
 ///
 /// type Queue {
-///     id: ID!
+///     _id: ID!
 ///     groupId: ID!
 ///     name: String!
 ///     records: [QueueRecord!]!
@@ -41,13 +43,18 @@ use tokio_compat_02::FutureExt;
 ///     message: String!
 /// }
 ///
+/// # Use only on database level for collections
+/// type TelegramUser {
+///     _id: TelegramID!
+/// }
+///
 /// ```
 pub struct MongoDB {
     database: mongodb::Database,
 }
 
 impl MongoDB {
-    pub async fn new() -> Result<MongoDB, Box<dyn std::error::Error>> {
+    pub async fn new() -> Result<MongoDB, Box<dyn Error>> {
         let mut options = ClientOptions::parse(env::var("MONGO_DSL").unwrap().as_str())
             .compat()
             .await
@@ -63,4 +70,13 @@ impl MongoDB {
     }
 }
 
-impl Database for MongoDB {}
+#[async_trait]
+impl Database for MongoDB {
+    async fn add_admin(&self, id: i64) -> Result<(), Box<dyn Error + Send + Sync>> {
+        self.database
+            .collection("admins")
+            .insert_one(doc! { "_id": id }, None)
+            .await?;
+        Ok(())
+    }
+}

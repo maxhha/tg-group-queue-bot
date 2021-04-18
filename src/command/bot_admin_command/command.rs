@@ -1,3 +1,5 @@
+use crate::Database;
+use std::sync::Arc;
 use teloxide::prelude::*;
 
 use data_encoding::BASE64;
@@ -6,18 +8,21 @@ use std::error::Error;
 
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 type Res = Result<(), Box<dyn Error + Send + Sync>>;
+type DB = Arc<Box<dyn Database>>;
 
 pub fn is_admin_password(pass: &String) -> bool {
     let hash = BASE64.encode(digest(&SHA512, pass.as_bytes()).as_ref());
     let true_hash = std::env::var("ADMIN_PASSWORD_HASH")
-        .expect("No ADMIN_PASSWORD_HASH was provided in environment");
+        .expect("ADMIN_PASSWORD_HASH wasn't provided in environment");
 
     hash == true_hash
 }
 
-pub async fn adm_start(cx: &Cx) -> Res {
+pub async fn adm_start(cx: &Cx, db: &DB) -> Res {
     match cx.update.from() {
         Some(user) => {
+            db.add_admin(user.id).await?;
+
             let nickname = user.clone().username.expect("Must be user");
             cx.answer(format!("@{} registered as bot admin.", nickname))
                 .await?;

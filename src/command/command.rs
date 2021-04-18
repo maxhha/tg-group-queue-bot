@@ -85,7 +85,7 @@ pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res
 
             if let Some(s) = &group_id {
                 if is_admin_password(s) {
-                    return adm_start(&cx).await;
+                    return adm_start(&cx, &db).await;
                 }
             }
 
