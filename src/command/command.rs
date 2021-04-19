@@ -136,8 +136,7 @@ async fn get_help_msg(cx: &Cx, db: &Arc<Box<dyn Database>>) -> Res {
             if db.is_admin(user.id).await? {
                 cx.answer(BOT_ADMIN_HELP_MSG).await?;
             } else {
-                cx.answer(USER_HELP_MSG)
-                    .await?;
+                cx.answer(USER_HELP_MSG).await?;
             }
         }
         None => {
