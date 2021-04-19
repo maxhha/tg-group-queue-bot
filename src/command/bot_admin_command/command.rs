@@ -1,21 +1,37 @@
+use crate::Database;
+use std::sync::Arc;
 use teloxide::prelude::*;
 
+use data_encoding::BASE64;
+use ring::digest::{digest, SHA512};
 use std::error::Error;
 
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 type Res = Result<(), Box<dyn Error + Send + Sync>>;
+type DB = Arc<Box<dyn Database>>;
 
-pub async fn adm_start(cx: &Cx, pwd: Option<String>) -> Res {
-    if None == pwd {
-        cx.reply_to("Seems like you specify empty password").await?;
-        return Ok(());
-    }
+pub fn is_admin_password(pass: &String) -> bool {
+    let hash = BASE64.encode(digest(&SHA512, pass.as_bytes()).as_ref());
+    let true_hash = std::env::var("ADMIN_PASSWORD_HASH")
+        .expect("ADMIN_PASSWORD_HASH wasn't provided in environment");
 
+    hash == true_hash
+}
+
+pub async fn adm_start(cx: &Cx, db: &DB) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("@{} registered as bot admin.", nickname))
-                .await?;
+
+            if db.is_admin(user.id).await? {
+                cx.answer(format!("@{} is already admin.", nickname))
+                    .await?;
+            } else {
+                db.add_admin(user.id).await?;
+
+                cx.answer(format!("@{} registered as bot admin.", nickname))
+                    .await?;
+            }
         }
         None => {
             cx.answer("Use this command as common message").await?;

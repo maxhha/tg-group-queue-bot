@@ -35,17 +35,9 @@ pub fn args_parser(s: String) -> Result<(OptArg<String>, OptArg<String>), ParseE
 
     // TODO Rewrite this part to smth more functional and readable
     match vec.len() {
-        0 => return Ok((OptArg(None), OptArg(None))),
-        1 => return Ok((OptArg(Some(vec[0].to_string())), OptArg(None))),
-        2 => {
-            return Ok((
-                OptArg(Some(vec[0].to_string())),
-                OptArg(Some(vec[1].to_string())),
-            ))
-        }
-        _ => Ok((
-            OptArg(Some(vec[0].to_string())),
-            OptArg(Some(vec[1].to_string())),
-        )),
+        0 => Ok((OptArg(None), OptArg(None))),
+        1 => Ok((OptArg(Some(vec[0].into())), OptArg(None))),
+        2 => Ok((OptArg(Some(vec[0].into())), OptArg(Some(vec[1].into())))),
+        _ => Ok((OptArg(Some(vec[0].into())), OptArg(Some(vec[1].into())))),
     }
 }
