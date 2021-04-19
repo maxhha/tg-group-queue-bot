@@ -80,25 +80,23 @@ pub type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
 pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res {
     match command {
-        Command::Help => get_help_msg(&cx).await?,
-        Command::Start { group_id } => start(&cx, group_id.into(), &db).await?,
-        Command::Link => link(&cx).await?,
-        Command::Name { username } => name(&cx, username.into()).await?,
-        Command::Push { subject, msg } => push(&cx, subject.into(), msg.into()).await?,
-        Command::Skip { subject } => skip(&cx, subject.into()).await?,
-        Command::List { subject } => list(&cx, subject.into()).await?,
-        Command::AddSubj { subject } => add_subject(&cx, subject.into()).await?,
-        Command::Pop { subject } => pop(&cx, subject.into()).await?,
-        Command::Shift { subject, username } => shift(&cx, subject.into(), username.into()).await?,
-        Command::Ban { username } => ban(&cx, username.into()).await?,
-        Command::DeleteGroup { group_id } => delete_group(&cx, group_id.into()).await?,
-        Command::LsGroups {} => ls_groups(&cx).await?,
-        Command::LsGroup { id } => ls_group(&cx, id.into()).await?,
-        Command::RmGroup { id } => rm_group(&cx, id.into()).await?,
-        Command::TotalBan { username } => total_ban(&cx, username.into()).await?,
-    };
-
-    Ok(())
+        Command::Help => get_help_msg(&cx).await,
+        Command::Start { group_id } => start(&cx, group_id.into(), &db).await,
+        Command::Link => link(&cx).await,
+        Command::Name { username } => name(&cx, username.into()).await,
+        Command::Push { subject, msg } => push(&cx, subject.into(), msg.into()).await,
+        Command::Skip { subject } => skip(&cx, subject.into()).await,
+        Command::List { subject } => list(&cx, subject.into()).await,
+        Command::AddSubj { subject } => add_subject(&cx, subject.into()).await,
+        Command::Pop { subject } => pop(&cx, subject.into()).await,
+        Command::Shift { subject, username } => shift(&cx, subject.into(), username.into()).await,
+        Command::Ban { username } => ban(&cx, username.into()).await,
+        Command::DeleteGroup { group_id } => delete_group(&cx, group_id.into()).await,
+        Command::LsGroups {} => ls_groups(&cx).await,
+        Command::LsGroup { id } => ls_group(&cx, id.into()).await,
+        Command::RmGroup { id } => rm_group(&cx, id.into()).await,
+        Command::TotalBan { username } => total_ban(&cx, username.into()).await,
+    }
 }
 
 async fn get_help_msg(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
