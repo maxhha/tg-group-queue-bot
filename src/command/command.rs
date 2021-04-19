@@ -5,13 +5,14 @@ use teloxide::{prelude::*, utils::command::BotCommand};
 
 use std::error::Error;
 
-use crate::command::bot_admin_command::*;
-use crate::command::common_command::*;
-use crate::command::group_admin_command::*;
+use super::bot_admin_command::*;
+use super::common_command::*;
+use super::group_admin_command::*;
 use crate::database::Database;
 use std::sync::Arc;
 
 type OptString = OptArg<String>;
+type DB = Arc<Box<dyn Database>>;
 
 #[derive(BotCommand)]
 #[command(rename = "lowercase", description = "These commands are supported:")]
@@ -80,17 +81,7 @@ pub type Res = Result<(), Box<dyn Error + Send + Sync>>;
 pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res {
     match command {
         Command::Help => get_help_msg(&cx).await?,
-        Command::Start { group_id } => {
-            let group_id: Option<String> = group_id.into();
-
-            if let Some(s) = &group_id {
-                if is_admin_password(s) {
-                    return adm_start(&cx, &db).await;
-                }
-            }
-
-            start(&cx, group_id).await?
-        }
+        Command::Start { group_id } => start(&cx, group_id.into(), &db).await?,
         Command::Link => link(&cx).await?,
         Command::Name { username } => name(&cx, username.into()).await?,
         Command::Push { subject, msg } => push(&cx, subject.into(), msg.into()).await?,
@@ -112,6 +103,20 @@ pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res
 
 async fn get_help_msg(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
     cx.answer(Command::descriptions()).await?;
+
+    Ok(())
+}
+
+async fn start(cx: &Cx, group_id: Option<String>, db: &DB) -> Res {
+    let group_id: Option<String> = group_id.into();
+
+    if let Some(s) = &group_id {
+        if is_admin_password(s) {
+            return adm_start(&cx, &db).await;
+        }
+    }
+
+    common_start(&cx, group_id).await?;
 
     Ok(())
 }

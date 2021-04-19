@@ -5,7 +5,7 @@ use std::error::Error;
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 type Res = Result<(), Box<dyn Error + Send + Sync>>;
 
-pub async fn start(cx: &Cx, group_id: Option<String>) -> Res {
+pub async fn common_start(cx: &Cx, group_id: Option<String>) -> Res {
     if None == group_id {
         cx.reply_to("Seems like you forget to specify group_id")
             .await?;
