@@ -1,4 +1,4 @@
-use crate::database::Database;
+use crate::database::{Database, Res};
 use async_trait::async_trait;
 use mongodb::bson::doc;
 use mongodb::{options::ClientOptions, Client};
@@ -72,7 +72,7 @@ impl MongoDB {
 
 #[async_trait]
 impl Database for MongoDB {
-    async fn add_admin(&self, id: i64) -> Result<(), Box<dyn Error + Send + Sync>> {
+    async fn add_admin(&self, id: i64) -> Res<()> {
         self.database
             .collection("admins")
             .insert_one(doc! { "_id": id }, None)
@@ -80,7 +80,7 @@ impl Database for MongoDB {
         Ok(())
     }
 
-    async fn is_admin(&self, id: i64) -> Result<bool, Box<dyn Error + Send + Sync>> {
+    async fn is_admin(&self, id: i64) -> Res<bool> {
         let user: Option<mongodb::bson::Document> = self
             .database
             .collection("admins")
@@ -88,5 +88,21 @@ impl Database for MongoDB {
             .await?;
 
         Ok(user.is_some())
+    }
+
+    async fn find_group(&self, member: i64) -> Res<Option<String>> {
+        Ok(None)
+    }
+
+    async fn create_group(&self, owner: i64) -> Res<String> {
+        Ok("test_group".into())
+    }
+
+    async fn add_group_member(&self, group: &String, member: i64) -> Res<()> {
+        Ok(())
+    }
+
+    async fn get_group(&self, group: &String) -> Res<Option<()>> {
+        Ok(Some(()))
     }
 }

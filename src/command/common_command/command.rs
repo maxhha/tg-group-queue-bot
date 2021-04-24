@@ -1,30 +1,38 @@
+use crate::Database;
+use std::sync::Arc;
 use teloxide::prelude::*;
 
 use std::error::Error;
 
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 type Res = Result<(), Box<dyn Error + Send + Sync>>;
+type DB = Arc<Box<dyn Database>>;
 
-pub async fn common_start(cx: &Cx, group_id: Option<String>) -> Res {
-    if None == group_id {
-        cx.reply_to("Seems like you forget to specify group_id")
-            .await?;
-        return Ok(());
-    }
+pub async fn common_start(cx: &Cx, group_id: Option<String>, db: &DB) -> Res {
+    if let Some(user) = cx.update.from() {
+        if let Some(group_id) = group_id {
+            if db.get_group(&group_id).await?.is_some() {
+                db.add_group_member(&group_id, user.id).await?;
+                let nickname = user.clone().username.expect("Must be user");
 
-    match cx.update.from() {
-        Some(user) => {
-            let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!(
-                "@{} registered new group #{}.",
-                nickname,
-                group_id.unwrap()
-            ))
-            .await?;
+                cx.answer(format!("@{} entered group #{}.", nickname, group_id))
+                    .await?;
+            } else {
+                cx.answer("Cant find room").await?;
+            }
+        } else {
+            if let Some(_group_id) = db.find_group(user.id).await? {
+                cx.reply_to("Sorry, you cant enter new room while membering in another.")
+                    .await?;
+            } else {
+                let group_id = db.create_group(user.id).await?;
+                let nickname = user.clone().username.expect("Must be user");
+                cx.answer(format!("@{} registered new group #{}.", nickname, group_id))
+                    .await?;
+            }
         }
-        None => {
-            cx.answer("Use this command as common message").await?;
-        }
+    } else {
+        cx.answer("Use this command as common message").await?;
     }
 
     Ok(())
@@ -36,9 +44,7 @@ pub async fn link(cx: &Cx) -> Res {
             let nickname = user.clone().username.expect("Must be user");
             cx.answer(format!("Your invite link is : {}", "")).await?;
         }
-        None => {
-            cx.answer("Use this command as common message").await?;
-        }
+        None => {}
     }
 
     Ok(())
