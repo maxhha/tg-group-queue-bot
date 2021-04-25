@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate enum_display_derive;
 use teloxide::prelude::*;
 
 mod command;

@@ -1,10 +1,22 @@
-use crate::database::{Database, Res};
+use crate::database::{Database, Group, Member, Res};
 use async_trait::async_trait;
+use mongodb::bson;
 use mongodb::bson::doc;
 use mongodb::{options::ClientOptions, Client};
 use std::env;
 use std::error::Error;
+use std::fmt::Display;
 use tokio_compat_02::FutureExt;
+
+#[derive(Debug, Display)]
+pub enum MongoDBError {
+    FailCreateObjectIdError,
+    InvalidDataTypeError(String),
+}
+
+impl Error for MongoDBError {}
+
+use MongoDBError::*;
 
 /// ## Database structure
 /// ```graphql
@@ -95,14 +107,102 @@ impl Database for MongoDB {
     }
 
     async fn create_group(&self, owner: i64) -> Res<String> {
-        Ok("test_group".into())
+        let group = self
+            .database
+            .collection("groups")
+            .insert_one(
+                doc! {
+                    "owner": owner,
+                    "members": [],
+                    "queues": [],
+                    "bans": []
+                },
+                None,
+            )
+            .await?
+            .inserted_id;
+
+        match group {
+            bson::Bson::ObjectId(id) => Ok(id.to_hex()),
+            _ => Err(Box::new(FailCreateObjectIdError)),
+        }
     }
 
     async fn add_group_member(&self, group: &String, member: i64) -> Res<()> {
         Ok(())
     }
 
-    async fn get_group(&self, group: &String) -> Res<Option<()>> {
-        Ok(Some(()))
+    async fn get_group(&self, group: &String) -> Res<Option<Group>> {
+        let group: Option<mongodb::bson::Document> = self
+            .database
+            .collection("groups")
+            .find_one(
+                doc! { "_id": bson::oid::ObjectId::with_string(group)? },
+                None,
+            )
+            .await?;
+
+        if let Some(group) = group {
+            let id = group
+                .get_object_id("_id")
+                .map_err(|_| InvalidDataTypeError("group._id".into()))?
+                .to_hex();
+
+            let owner = group
+                .get_i64("owner")
+                .map_err(|_| InvalidDataTypeError("group.owner".into()))?;
+
+            let members = group
+                .get_array("members")
+                .map_err(|_| InvalidDataTypeError("group.members".into()))?
+                .into_iter()
+                .enumerate()
+                .map::<Result<_, MongoDBError>, _>(|(i, x)| {
+                    let x = x
+                        .as_document()
+                        .ok_or(InvalidDataTypeError(format!("group.members[{}]", i)))?;
+
+                    Ok(Member {
+                        id: x.get_i64("id").map_err(|_| {
+                            InvalidDataTypeError(format!("group.members[{}].id", i))
+                        })?,
+                        name: x.get_str("name").ok().map(|x| x.into()),
+                    })
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+
+            let queues = group
+                .get_array("queues")
+                .map_err(|_| InvalidDataTypeError("group.queues".into()))?
+                .into_iter()
+                .enumerate()
+                .map::<Result<_, MongoDBError>, _>(|(i, x)| {
+                    Ok(x.as_str()
+                        .ok_or(InvalidDataTypeError(format!("queues[{}]", i)))?
+                        .into())
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+
+            let bans = group
+                .get_array("bans")
+                .map_err(|_| InvalidDataTypeError("group.bans".into()))?
+                .into_iter()
+                .enumerate()
+                .map(|(i, x)| {
+                    x.as_i64()
+                        .ok_or(InvalidDataTypeError(format!("group.bans[{}]", i)))
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+
+            Ok(Some(Group {
+                id,
+                owner,
+                members,
+                queues,
+                bans,
+            }))
+        } else {
+            Ok(None)
+        }
     }
 }
