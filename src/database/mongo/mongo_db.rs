@@ -3,6 +3,7 @@ use async_trait::async_trait;
 use mongodb::bson;
 use mongodb::bson::doc;
 use mongodb::{options::ClientOptions, Client};
+use serde::{Deserialize, Serialize};
 use std::env;
 use std::error::Error;
 use std::fmt::Display;
@@ -11,12 +12,47 @@ use tokio_compat_02::FutureExt;
 #[derive(Debug, Display)]
 pub enum MongoDBError {
     FailCreateObjectIdError,
-    InvalidDataTypeError(String),
 }
 
 impl Error for MongoDBError {}
 
 use MongoDBError::*;
+
+#[derive(Serialize, Deserialize)]
+struct MongoGroup {
+    _id: String,
+    owner: i64,
+    members: Vec<MongoMember>,
+    queues: Vec<String>,
+    bans: Vec<i64>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct MongoMember {
+    id: i64,
+    name: Option<String>,
+}
+
+impl Into<Member> for MongoMember {
+    fn into(self) -> Member {
+        Member {
+            id: self.id,
+            name: self.name,
+        }
+    }
+}
+
+impl Into<Group> for MongoGroup {
+    fn into(self) -> Group {
+        Group {
+            id: self._id,
+            owner: self.owner,
+            members: self.members.into_iter().map(|x| x.into()).collect(),
+            queues: self.queues,
+            bans: self.bans,
+        }
+    }
+}
 
 /// ## Database structure
 /// ```graphql
@@ -93,7 +129,7 @@ impl Database for MongoDB {
     }
 
     async fn is_admin(&self, id: i64) -> Res<bool> {
-        let user: Option<mongodb::bson::Document> = self
+        let user: Option<bson::Document> = self
             .database
             .collection("admins")
             .find_one(doc! { "_id": id }, None)
@@ -103,7 +139,28 @@ impl Database for MongoDB {
     }
 
     async fn find_group(&self, member: i64) -> Res<Option<String>> {
-        Ok(None)
+        let group: Option<bson::Document> = self
+            .database
+            .collection("groups")
+            .find_one(
+                doc! {
+                    "members":{
+                        "id": member
+                    }
+                },
+                Some(
+                    mongodb::options::FindOneOptions::builder()
+                        .return_key(true)
+                        .build(),
+                ),
+            )
+            .await?;
+
+        if let Some(group) = group {
+            Ok(Some(group.get_object_id("_id")?.to_hex()))
+        } else {
+            Ok(None)
+        }
     }
 
     async fn create_group(&self, owner: i64) -> Res<String> {
@@ -113,7 +170,9 @@ impl Database for MongoDB {
             .insert_one(
                 doc! {
                     "owner": owner,
-                    "members": [],
+                    "members": [{
+                        "id": owner,
+                    }],
                     "queues": [],
                     "bans": []
                 },
@@ -143,64 +202,7 @@ impl Database for MongoDB {
             .await?;
 
         if let Some(group) = group {
-            let id = group
-                .get_object_id("_id")
-                .map_err(|_| InvalidDataTypeError("group._id".into()))?
-                .to_hex();
-
-            let owner = group
-                .get_i64("owner")
-                .map_err(|_| InvalidDataTypeError("group.owner".into()))?;
-
-            let members = group
-                .get_array("members")
-                .map_err(|_| InvalidDataTypeError("group.members".into()))?
-                .into_iter()
-                .enumerate()
-                .map::<Result<_, MongoDBError>, _>(|(i, x)| {
-                    let x = x
-                        .as_document()
-                        .ok_or(InvalidDataTypeError(format!("group.members[{}]", i)))?;
-
-                    Ok(Member {
-                        id: x.get_i64("id").map_err(|_| {
-                            InvalidDataTypeError(format!("group.members[{}].id", i))
-                        })?,
-                        name: x.get_str("name").ok().map(|x| x.into()),
-                    })
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-
-            let queues = group
-                .get_array("queues")
-                .map_err(|_| InvalidDataTypeError("group.queues".into()))?
-                .into_iter()
-                .enumerate()
-                .map::<Result<_, MongoDBError>, _>(|(i, x)| {
-                    Ok(x.as_str()
-                        .ok_or(InvalidDataTypeError(format!("queues[{}]", i)))?
-                        .into())
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-
-            let bans = group
-                .get_array("bans")
-                .map_err(|_| InvalidDataTypeError("group.bans".into()))?
-                .into_iter()
-                .enumerate()
-                .map(|(i, x)| {
-                    x.as_i64()
-                        .ok_or(InvalidDataTypeError(format!("group.bans[{}]", i)))
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-
-            Ok(Some(Group {
-                id,
-                owner,
-                members,
-                queues,
-                bans,
-            }))
+            Ok(Some(bson::from_document::<MongoGroup>(group)?.into()))
         } else {
             Ok(None)
         }

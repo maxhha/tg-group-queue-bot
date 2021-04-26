@@ -10,26 +10,23 @@ type DB = Arc<Box<dyn Database>>;
 
 pub async fn common_start(cx: &Cx, group_id: Option<String>, db: &DB) -> Res {
     if let Some(user) = cx.update.from() {
-        if let Some(group_id) = group_id {
+        let nickname = user.clone().username.expect("Must be user");
+
+        if let Some(_) = db.find_group(user.id).await? {
+            cx.reply_to("Sorry, you cant enter new room while membering in another.")
+                .await?;
+        } else if let Some(group_id) = group_id {
             if db.get_group(&group_id).await?.is_some() {
                 db.add_group_member(&group_id, user.id).await?;
-                let nickname = user.clone().username.expect("Must be user");
-
                 cx.answer(format!("@{} entered group #{}.", nickname, group_id))
                     .await?;
             } else {
                 cx.answer("Cant find room").await?;
             }
         } else {
-            if let Some(_group_id) = db.find_group(user.id).await? {
-                cx.reply_to("Sorry, you cant enter new room while membering in another.")
-                    .await?;
-            } else {
-                let group_id = db.create_group(user.id).await?;
-                let nickname = user.clone().username.expect("Must be user");
-                cx.answer(format!("@{} registered new group #{}.", nickname, group_id))
-                    .await?;
-            }
+            let group_id = db.create_group(user.id).await?;
+            cx.answer(format!("@{} registered new group #{}.", nickname, group_id))
+                .await?;
         }
     } else {
         cx.answer("Use this command as common message").await?;
