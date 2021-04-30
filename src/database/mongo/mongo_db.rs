@@ -1,7 +1,7 @@
 use crate::database::{Database, Group, Member, Res};
 use async_trait::async_trait;
 use mongodb::bson;
-use mongodb::bson::doc;
+use mongodb::bson::{doc, oid::ObjectId};
 use mongodb::{options::ClientOptions, Client};
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -20,7 +20,7 @@ use MongoDBError::*;
 
 #[derive(Serialize, Deserialize)]
 struct MongoGroup {
-    _id: String,
+    _id: ObjectId,
     owner: i64,
     members: Vec<MongoMember>,
     queues: Vec<String>,
@@ -45,7 +45,7 @@ impl Into<Member> for MongoMember {
 impl Into<Group> for MongoGroup {
     fn into(self) -> Group {
         Group {
-            id: self._id,
+            id: self._id.to_hex(),
             owner: self.owner,
             members: self.members.into_iter().map(|x| x.into()).collect(),
             queues: self.queues,
@@ -144,9 +144,7 @@ impl Database for MongoDB {
             .collection("groups")
             .find_one(
                 doc! {
-                    "members":{
-                        "id": member
-                    }
+                    "members.id": member
                 },
                 Some(
                     mongodb::options::FindOneOptions::builder()
@@ -188,6 +186,22 @@ impl Database for MongoDB {
     }
 
     async fn add_group_member(&self, group: &String, member: i64) -> Res<()> {
+        self.database
+            .collection("groups")
+            .update_one(
+                doc! {
+                    "_id": ObjectId::with_string(group)?,
+                    "members.id": { "$ne": member }
+                },
+                doc! {
+                    "$push": {
+                        "members": { "id": member }
+                    }
+                },
+                None,
+            )
+            .await?;
+
         Ok(())
     }
 
@@ -195,10 +209,7 @@ impl Database for MongoDB {
         let group: Option<mongodb::bson::Document> = self
             .database
             .collection("groups")
-            .find_one(
-                doc! { "_id": bson::oid::ObjectId::with_string(group)? },
-                None,
-            )
+            .find_one(doc! { "_id": ObjectId::with_string(group)? }, None)
             .await?;
 
         if let Some(group) = group {
