@@ -187,7 +187,7 @@ impl Database for MongoDB {
 
     async fn add_group_member(&self, group: &String, member: i64) -> Res<()> {
         self.database
-            .collection_with_type::<bson::Document>("groups")
+            .collection::<bson::Document>("groups")
             .update_one(
                 doc! {
                     "_id": ObjectId::with_string(group)?,
