@@ -156,7 +156,7 @@ async fn start(cx: &Cx, group_id: Option<String>, db: &DB) -> Res {
         }
     }
 
-    common_start(&cx, group_id).await?;
+    common_start(&cx, group_id, &db).await?;
 
     Ok(())
 }

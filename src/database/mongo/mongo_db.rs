@@ -1,10 +1,58 @@
-use crate::database::Database;
+use crate::database::{Database, Group, Member, Res};
 use async_trait::async_trait;
-use mongodb::bson::doc;
+use mongodb::bson;
+use mongodb::bson::{doc, oid::ObjectId};
 use mongodb::{options::ClientOptions, Client};
+use serde::{Deserialize, Serialize};
 use std::env;
 use std::error::Error;
+use std::fmt::Display;
 use tokio_compat_02::FutureExt;
+
+#[derive(Debug, Display)]
+pub enum MongoDBError {
+    FailCreateObjectIdError,
+}
+
+impl Error for MongoDBError {}
+
+use MongoDBError::*;
+
+#[derive(Serialize, Deserialize)]
+struct MongoGroup {
+    _id: ObjectId,
+    owner: i64,
+    members: Vec<MongoMember>,
+    queues: Vec<String>,
+    bans: Vec<i64>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct MongoMember {
+    id: i64,
+    name: Option<String>,
+}
+
+impl Into<Member> for MongoMember {
+    fn into(self) -> Member {
+        Member {
+            id: self.id,
+            name: self.name,
+        }
+    }
+}
+
+impl Into<Group> for MongoGroup {
+    fn into(self) -> Group {
+        Group {
+            id: self._id.to_hex(),
+            owner: self.owner,
+            members: self.members.into_iter().map(|x| x.into()).collect(),
+            queues: self.queues,
+            bans: self.bans,
+        }
+    }
+}
 
 /// ## Database structure
 /// ```graphql
@@ -72,7 +120,7 @@ impl MongoDB {
 
 #[async_trait]
 impl Database for MongoDB {
-    async fn add_admin(&self, id: i64) -> Result<(), Box<dyn Error + Send + Sync>> {
+    async fn add_admin(&self, id: i64) -> Res<()> {
         self.database
             .collection("admins")
             .insert_one(doc! { "_id": id }, None)
@@ -80,13 +128,94 @@ impl Database for MongoDB {
         Ok(())
     }
 
-    async fn is_admin(&self, id: i64) -> Result<bool, Box<dyn Error + Send + Sync>> {
-        let user: Option<mongodb::bson::Document> = self
+    async fn is_admin(&self, id: i64) -> Res<bool> {
+        let user: Option<bson::Document> = self
             .database
             .collection("admins")
             .find_one(doc! { "_id": id }, None)
             .await?;
 
         Ok(user.is_some())
+    }
+
+    async fn find_group(&self, member: i64) -> Res<Option<String>> {
+        let group: Option<bson::Document> = self
+            .database
+            .collection("groups")
+            .find_one(
+                doc! {
+                    "members.id": member
+                },
+                Some(
+                    mongodb::options::FindOneOptions::builder()
+                        .return_key(true)
+                        .build(),
+                ),
+            )
+            .await?;
+
+        if let Some(group) = group {
+            Ok(Some(group.get_object_id("_id")?.to_hex()))
+        } else {
+            Ok(None)
+        }
+    }
+
+    async fn create_group(&self, owner: i64) -> Res<String> {
+        let group = self
+            .database
+            .collection("groups")
+            .insert_one(
+                doc! {
+                    "owner": owner,
+                    "members": [{
+                        "id": owner,
+                    }],
+                    "queues": [],
+                    "bans": []
+                },
+                None,
+            )
+            .await?
+            .inserted_id;
+
+        match group {
+            bson::Bson::ObjectId(id) => Ok(id.to_hex()),
+            _ => Err(Box::new(FailCreateObjectIdError)),
+        }
+    }
+
+    async fn add_group_member(&self, group: &String, member: i64) -> Res<()> {
+        self.database
+            .collection::<bson::Document>("groups")
+            .update_one(
+                doc! {
+                    "_id": ObjectId::with_string(group)?,
+                    "members.id": { "$ne": member }
+                },
+                doc! {
+                    "$push": {
+                        "members": { "id": member }
+                    }
+                },
+                None,
+            )
+            .await?;
+
+        Ok(())
+    }
+
+    async fn get_group(&self, group: &String) -> Res<Option<Group>> {
+        let group: Option<mongodb::bson::Document> = self
+            .database
+            .collection("groups")
+            .find_one(doc! { "_id": ObjectId::with_string(group)? }, None)
+            .await?;
+
+        if let Some(group) = group {
+            Ok(Some(bson::from_document::<MongoGroup>(group)?.into()))
+        } else {
+            Ok(None)
+        }
     }
 }
