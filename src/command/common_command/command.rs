@@ -47,26 +47,27 @@ pub async fn link(cx: &Cx) -> Res {
     Ok(())
 }
 
-pub async fn name(cx: &Cx, username: Option<String>) -> Res {
+pub async fn name(cx: &Cx, username: Option<String>, db: &DB) -> Res {
     if None == username {
         cx.reply_to("Seems like you forget to specify username")
             .await?;
         return Ok(());
     }
 
-    match cx.update.from() {
-        Some(user) => {
-            let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!(
-                "@{} registered as {}.",
-                nickname,
-                username.unwrap()
-            ))
-            .await?;
+    if let Some(user) = cx.update.from() {
+        let nickname = user.clone().username.expect("Must be user");
+
+        if None == db.find_group(user.id).await? {
+            cx.reply_to("Sorry, you must be membering in a group.")
+                .await?;
+        } else {
+            let name = username.unwrap();
+            db.set_username(user.id, &name).await?;
+            cx.answer(format!("@{} changed his(her) name to {}.", nickname, name))
+                .await?;
         }
-        None => {
-            cx.answer("Use this command as common message").await?;
-        }
+    } else {
+        cx.answer("Use this command as common message").await?;
     }
 
     Ok(())

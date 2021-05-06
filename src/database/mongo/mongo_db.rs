@@ -146,11 +146,7 @@ impl Database for MongoDB {
                 doc! {
                     "members.id": member
                 },
-                Some(
-                    mongodb::options::FindOneOptions::builder()
-                        .return_key(true)
-                        .build(),
-                ),
+                None,
             )
             .await?;
 
@@ -217,5 +213,29 @@ impl Database for MongoDB {
         } else {
             Ok(None)
         }
+    }
+
+    async fn set_username(&self, member: i64, username: &String) -> Res<()> {
+        let group = self.find_group(member).await?;
+
+        if let Some(group) = group {
+            self.database
+                .collection::<bson::Document>("groups")
+                .update_one(
+                    doc! {
+                        "_id": ObjectId::with_string(&group)?,
+                        "members.id": member
+                    },
+                    doc! {
+                        "$set": {
+                            "members.$": { "id": member, "name": username }
+                        }
+                    },
+                    None,
+                )
+                .await?;
+        }
+
+        Ok(())
     }
 }
