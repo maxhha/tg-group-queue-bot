@@ -264,16 +264,16 @@ impl Database for MongoDB {
         let queue = self.find_subject(subject).await?;
 
         if let Some(queue) = queue {
+            let id = ObjectId::with_string(&queue)?;
             self.database
                 .collection::<bson::Document>("groups")
                 .update_one(
                     doc! {
                     "_id": ObjectId::with_string(&group)?,
-                    "queues.id": { "$ne": (queue.clone()) }
                 },
                     doc! {
-                    "$pop": {
-                        "queues": { "id": (queue.clone()) }
+                    "$pull": {
+                        "queues": { "id": (id.clone()) }
                     }
                 },
                     None,
@@ -284,12 +284,11 @@ impl Database for MongoDB {
                 .collection::<bson::Document>("queues")
                 .delete_one(
                     doc! {
-                    "_id": ObjectId::with_string(&queue)?,
+                    "_id": id,
                 },
                     None,
                 )
                 .await?;
-
         }
 
         Ok(("".to_string()))
