@@ -227,14 +227,14 @@ impl Database for MongoDB {
                 .collection::<bson::Document>("groups")
                 .update_one(
                     doc! {
-                    "_id": ObjectId::with_string(&group)?,
-                    "members.id": { "$e": member }
-                },
+                        "_id": ObjectId::with_string(&group)?,
+                        "members.id": { "$e": member }
+                    },
                     doc! {
-                    "$push": {
-                        "members": { "id": member, "name": username }
-                    }
-                },
+                        "$push": {
+                            "members": { "id": member, "name": username }
+                        }
+                    },
                     None,
                 )
                 .await?;

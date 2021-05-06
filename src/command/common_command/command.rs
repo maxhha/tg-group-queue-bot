@@ -62,7 +62,7 @@ pub async fn name(cx: &Cx, username: Option<String>, db: &DB) -> Res {
                 .await?;
         } else {
             let name = username.unwrap();
-            db.set_username( user.id, &name).await?;
+            db.set_username(user.id, &name).await?;
             cx.answer(format!("@{} changed his(her) name to #{}.", nickname, name))
                 .await?;
         }
@@ -94,7 +94,7 @@ pub async fn push(cx: &Cx, subject: Option<String>, msg: Option<String>) -> Res 
                 subject.unwrap(),
                 msg.unwrap()
             ))
-                .await?;
+            .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -119,7 +119,7 @@ pub async fn skip(cx: &Cx, subject: Option<String>) -> Res {
                 nickname,
                 subject.unwrap()
             ))
-                .await?;
+            .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
