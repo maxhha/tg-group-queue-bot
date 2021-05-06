@@ -51,7 +51,7 @@ pub async fn rm_subject(cx: &Cx, subject: Option<String>, db: &DB) -> Res {
                 nickname,
                 subject.unwrap()
             ))
-                .await?;
+            .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;

@@ -269,13 +269,13 @@ impl Database for MongoDB {
                 .collection::<bson::Document>("groups")
                 .update_one(
                     doc! {
-                    "_id": ObjectId::with_string(&group)?,
-                },
+                        "_id": ObjectId::with_string(&group)?,
+                    },
                     doc! {
-                    "$pull": {
-                        "queues": { "id": (id.clone()) }
-                    }
-                },
+                        "$pull": {
+                            "queues": { "id": (id.clone()) }
+                        }
+                    },
                     None,
                 )
                 .await?;
@@ -284,8 +284,8 @@ impl Database for MongoDB {
                 .collection::<bson::Document>("queues")
                 .delete_one(
                     doc! {
-                    "_id": id,
-                },
+                        "_id": id,
+                    },
                     None,
                 )
                 .await?;
