@@ -146,11 +146,7 @@ impl Database for MongoDB {
                 doc! {
                     "members.id": member
                 },
-                Some(
-                    mongodb::options::FindOneOptions::builder()
-                        .return_key(true)
-                        .build(),
-                ),
+                None,
             )
             .await?;
 
@@ -228,7 +224,7 @@ impl Database for MongoDB {
                 .update_one(
                     doc! {
                         "_id": ObjectId::with_string(&group)?,
-                        "members.id": { "$e": member }
+                        "members.id": member
                     },
                     doc! {
                         "$push": {
