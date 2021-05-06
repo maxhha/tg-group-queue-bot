@@ -70,7 +70,7 @@ pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res
         Command::Push { subject, msg } => push(&cx, subject.into(), msg.into()).await,
         Command::Skip { subject } => skip(&cx, subject.into()).await,
         Command::List { subject } => list(&cx, subject.into()).await,
-        Command::AddSubj { subject } => add_subject(&cx, subject.into()).await,
+        Command::AddSubj { subject } => add_subject(&cx, subject.into(), &db).await,
         Command::Pop { subject } => pop(&cx, subject.into()).await,
         Command::Shift { subject, username } => shift(&cx, subject.into(), username.into()).await,
         Command::Ban { username } => ban(&cx, username.into()).await,
