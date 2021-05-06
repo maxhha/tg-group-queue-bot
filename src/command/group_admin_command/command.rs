@@ -47,7 +47,7 @@ pub async fn rm_subject(cx: &Cx, subject: Option<String>, db: &DB) -> Res {
             db.rm_subject(user.id, &subject.clone().unwrap()).await?;
 
             cx.answer(format!(
-                "@{} registered new subject #{}.",
+                "@{} removed #{} subject.",
                 nickname,
                 subject.unwrap()
             ))
