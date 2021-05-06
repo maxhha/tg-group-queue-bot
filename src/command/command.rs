@@ -71,7 +71,7 @@ pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res
         Command::Skip { subject } => skip(&cx, subject.into()).await,
         Command::List { subject } => list(&cx, subject.into()).await,
         Command::AddSubj { subject } => add_subject(&cx, subject.into()).await,
-        Command::Pop { subject } => pop(&cx, subject.into()).await,
+        Command::Pop { subject } => pop(&cx, subject.into(), &db).await,
         Command::Shift { subject, username } => shift(&cx, subject.into(), username.into()).await,
         Command::Ban { username } => ban(&cx, username.into()).await,
         Command::DeleteGroup { group_id } => delete_group(&cx, group_id.into()).await,
