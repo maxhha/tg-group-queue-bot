@@ -218,4 +218,28 @@ impl Database for MongoDB {
             Ok(None)
         }
     }
+
+    async fn set_username(&self, member: i64, username: &String) -> Res<()> {
+        let group = self.find_group(member).await?;
+
+        if let Some(group) = group {
+            self.database
+                .collection::<bson::Document>("groups")
+                .update_one(
+                    doc! {
+                    "_id": ObjectId::with_string(&group)?,
+                    "members.id": { "$e": member }
+                },
+                    doc! {
+                    "$push": {
+                        "members": { "id": member, "name": username }
+                    }
+                },
+                    None,
+                )
+                .await?;
+        }
+
+        Ok(())
+    }
 }
