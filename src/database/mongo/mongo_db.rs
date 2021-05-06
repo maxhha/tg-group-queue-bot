@@ -238,4 +238,60 @@ impl Database for MongoDB {
 
         Ok(())
     }
+
+    async fn find_subject(&self, subject: &String) -> Res<Option<String>> {
+        let subj: Option<bson::Document> = self
+            .database
+            .collection("queues")
+            .find_one(
+                doc! {
+                    "name": subject
+                },
+                None,
+            )
+            .await?;
+
+        if let Some(group) = subj {
+            Ok(Some(group.get_object_id("_id")?.to_hex()))
+        } else {
+            Ok(None)
+        }
+    }
+
+    async fn rm_subject(&self, owner: i64, subject: &String) -> Res<(String)> {
+        let group = self.find_group(owner).await?.unwrap();
+
+        let queue = self.find_subject(subject).await?;
+
+        if let Some(queue) = queue {
+            self.database
+                .collection::<bson::Document>("groups")
+                .update_one(
+                    doc! {
+                    "_id": ObjectId::with_string(&group)?,
+                    "queues.id": { "$ne": (queue.clone()) }
+                },
+                    doc! {
+                    "$pop": {
+                        "queues": { "id": (queue.clone()) }
+                    }
+                },
+                    None,
+                )
+                .await?;
+
+            self.database
+                .collection::<bson::Document>("queues")
+                .delete_one(
+                    doc! {
+                    "_id": ObjectId::with_string(&queue)?,
+                },
+                    None,
+                )
+                .await?;
+
+        }
+
+        Ok(("".to_string()))
+    }
 }

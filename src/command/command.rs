@@ -36,6 +36,8 @@ pub enum Command {
     #[command(parse_with = "args_parser")]
     AddSubj { subject: OptString },
     #[command(parse_with = "args_parser")]
+    RmSubj { subject: OptString },
+    #[command(parse_with = "args_parser")]
     Pop { subject: OptString },
     #[command(parse_with = "args_parser")]
     Shift {
@@ -71,6 +73,7 @@ pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res
         Command::Skip { subject } => skip(&cx, subject.into()).await,
         Command::List { subject } => list(&cx, subject.into()).await,
         Command::AddSubj { subject } => add_subject(&cx, subject.into()).await,
+        Command::RmSubj { subject } => rm_subject(&cx, subject.into(), &db).await,
         Command::Pop { subject } => pop(&cx, subject.into()).await,
         Command::Shift { subject, username } => shift(&cx, subject.into(), username.into()).await,
         Command::Ban { username } => ban(&cx, username.into()).await,
@@ -102,6 +105,7 @@ User level:\n\
 /list - Show queue\n\n\
 Group admin level:\n\
 /addsubj - Add subject to group\n\
+/rmsubj - Delete subject from group\n\
 /pop - Remove first user in queue\n\
 /shift - Move first record to the end\n\
 /ban - Ban specified user\n\
@@ -118,6 +122,7 @@ User level:\n\
 /list - Show queue\n\n\
 Group admin level:\n\
 /addsubj - Add subject to group\n\
+/rmsubj - Delete subject from group\n\
 /pop - Remove first user in queue\n\
 /shift - Move first record to the end\n\
 /ban - Ban specified user\n\

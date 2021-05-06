@@ -1,9 +1,12 @@
+use crate::Database;
+use std::sync::Arc;
 use teloxide::prelude::*;
 
 use std::error::Error;
 
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
 type Res = Result<(), Box<dyn Error + Send + Sync>>;
+type DB = Arc<Box<dyn Database>>;
 
 pub async fn add_subject(cx: &Cx, subject: Option<String>) -> Res {
     if None == subject {
@@ -21,6 +24,34 @@ pub async fn add_subject(cx: &Cx, subject: Option<String>) -> Res {
                 subject.unwrap()
             ))
             .await?;
+        }
+        None => {
+            cx.answer("Use this command as common message").await?;
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn rm_subject(cx: &Cx, subject: Option<String>, db: &DB) -> Res {
+    if None == subject {
+        cx.reply_to("Seems like you forget to specify subject")
+            .await?;
+        return Ok(());
+    }
+
+    match cx.update.from() {
+        Some(user) => {
+            let nickname = user.clone().username.expect("Must be user");
+
+            db.rm_subject(user.id, &subject.clone().unwrap()).await?;
+
+            cx.answer(format!(
+                "@{} registered new subject #{}.",
+                nickname,
+                subject.unwrap()
+            ))
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
