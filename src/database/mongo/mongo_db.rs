@@ -261,7 +261,6 @@ impl Database for MongoDB {
             .update_one(
                 doc! {
                     "_id": ObjectId::with_string(&group)?,
-                    "queues.id": { "$ne": (queue.clone()) }
                 },
                 doc! {
                     "$push": {
