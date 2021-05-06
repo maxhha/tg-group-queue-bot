@@ -221,14 +221,14 @@ impl Database for MongoDB {
         if let Some(group) = group {
             self.database
                 .collection::<bson::Document>("groups")
-                .find_one_and_update(
+                .update_one(
                     doc! {
                         "_id": ObjectId::with_string(&group)?,
                         "members.id": member
                     },
                     doc! {
                         "$set": {
-                            "members": { "id": member, "name": username }
+                            "members.$": { "id": member, "name": username }
                         }
                     },
                     None,

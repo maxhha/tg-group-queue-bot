@@ -63,7 +63,7 @@ pub async fn name(cx: &Cx, username: Option<String>, db: &DB) -> Res {
         } else {
             let name = username.unwrap();
             db.set_username(user.id, &name).await?;
-            cx.answer(format!("@{} changed his(her) name to #{}.", nickname, name))
+            cx.answer(format!("@{} changed his(her) name to {}.", nickname, name))
                 .await?;
         }
     } else {
