@@ -49,7 +49,7 @@ pub async fn link(cx: &Cx) -> Res {
 
 pub async fn name(cx: &Cx, username: Option<String>, db: &DB) -> Res {
     if None == username {
-        cx.reply_to("Seems like you forget to specify subject")
+        cx.reply_to("Seems like you forget to specify username")
             .await?;
         return Ok(());
     }
