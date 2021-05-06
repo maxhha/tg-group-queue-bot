@@ -242,14 +242,15 @@ impl Database for MongoDB {
     async fn add_subject(&self, owner: i64, subject: &String) -> Res<(String)> {
         let group = self.find_group(owner).await?.unwrap();
 
-        let queue = self.database
+        let queue = self
+            .database
             .collection::<bson::Document>("queues")
             .insert_one(
                 doc! {
-                        "groupId": (group.clone()),
-                        "name": subject,
-                        "records" : []
-                    },
+                    "groupId": (group.clone()),
+                    "name": subject,
+                    "records" : []
+                },
                 None,
             )
             .await?
