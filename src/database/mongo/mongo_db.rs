@@ -264,13 +264,13 @@ impl Database for MongoDB {
                 },
                 doc! {
                     "$push": {
-                        "queues": { "id": queue }
+                        "queues": { "id": (queue.clone()) }
                     }
                 },
                 None,
             )
             .await?;
 
-        Ok(("".to_string()))
+        Ok(queue.to_string())
     }
 }
