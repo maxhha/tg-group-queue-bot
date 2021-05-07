@@ -278,6 +278,41 @@ impl Database for MongoDB {
         Ok("".to_string())
     }
 
+    async fn add_subject(&self, owner: i64, subject: &String) -> Res<(String)> {
+        let group = self.find_group(owner).await?.unwrap();
+
+        let queue = self
+            .database
+            .collection::<bson::Document>("queues")
+            .insert_one(
+                doc! {
+                    "groupId": (group.clone()),
+                    "name": subject,
+                    "records" : []
+                },
+                None,
+            )
+            .await?
+            .inserted_id;
+
+        self.database
+            .collection::<bson::Document>("groups")
+            .update_one(
+                doc! {
+                    "_id": ObjectId::with_string(&group)?,
+                },
+                doc! {
+                    "$push": {
+                        "queues": { "id": (queue.clone()) }
+                    }
+                },
+                None,
+            )
+            .await?;
+
+        Ok(queue.to_string())
+    }
+
     async fn find_subject(&self, subject: &String) -> Res<Option<String>> {
         let subj: Option<bson::Document> = self
             .database
