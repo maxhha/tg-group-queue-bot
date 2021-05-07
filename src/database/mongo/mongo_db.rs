@@ -17,7 +17,6 @@ pub enum MongoDBError {
 impl Error for MongoDBError {}
 
 use MongoDBError::*;
-use teloxide::types::Document;
 
 #[derive(Serialize, Deserialize)]
 struct MongoGroup {
@@ -285,5 +284,60 @@ impl Database for MongoDB {
         }
 
         Ok("".to_string())
+    }
+
+    async fn find_subject(&self, subject: &String) -> Res<Option<String>> {
+        let subj: Option<bson::Document> = self
+            .database
+            .collection("queues")
+            .find_one(
+                doc! {
+                    "name": subject
+                },
+                None,
+            )
+            .await?;
+
+        if let Some(group) = subj {
+            Ok(Some(group.get_object_id("_id")?.to_hex()))
+        } else {
+            Ok(None)
+        }
+    }
+
+    async fn rm_subject(&self, owner: i64, subject: &String) -> Res<(String)> {
+        let group = self.find_group(owner).await?.unwrap();
+
+        let queue = self.find_subject(subject).await?;
+
+        if let Some(queue) = queue {
+            let id = ObjectId::with_string(&queue)?;
+            self.database
+                .collection::<bson::Document>("groups")
+                .update_one(
+                    doc! {
+                        "_id": ObjectId::with_string(&group)?,
+                    },
+                    doc! {
+                        "$pull": {
+                            "queues": { "id": (id.clone()) }
+                        }
+                    },
+                    None,
+                )
+                .await?;
+
+            self.database
+                .collection::<bson::Document>("queues")
+                .delete_one(
+                    doc! {
+                        "_id": id,
+                    },
+                    None,
+                )
+                .await?;
+        }
+
+        Ok(("".to_string()))
     }
 }
