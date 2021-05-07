@@ -239,6 +239,45 @@ impl Database for MongoDB {
         Ok(())
     }
 
+    async fn find_queue(&self, group: &String, subject: &String) -> Res<Option<String>> {
+        let queue: Option<mongodb::bson::Document> = self
+            .database
+            .collection::<bson::Document>("queues")
+            .find_one(
+                doc! {
+                    "groupId": (group.clone()),
+                    "name": subject,
+                },
+                None,
+            )
+            .await?;
+
+        if let Some(queue) = queue {
+            Ok(Some(queue.get_object_id("_id")?.to_hex()))
+        } else {
+            Ok(None)
+        }
+    }
+
+    async fn pop_first_queue_pos(&self, queueid: &String) -> Res<String> {
+        self.database
+            .collection::<bson::Document>("queues")
+            .update_one(
+                doc! {
+                    "_id": ObjectId::with_string(&queueid)?,
+                },
+                doc! {
+                    "$pop": {
+                        "records": -1
+                    }
+                },
+                None,
+            )
+            .await?;
+
+        Ok("".to_string())
+    }
+
     async fn add_subject(&self, owner: i64, subject: &String) -> Res<(String)> {
         let group = self.find_group(owner).await?.unwrap();
 
