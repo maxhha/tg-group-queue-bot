@@ -29,7 +29,7 @@ pub trait Database: Send + Sync {
 
 
     async fn find_queue(&self, group: &String, subject: &String) -> Res<Option<String>>;
-    async fn pop_first_queue_pos(&self, owner: i64, subject: &String) -> Res<String>;
+    async fn pop_first_queue_pos(&self, queueid: &String) -> Res<String>;
 
 
     async fn find_subject(&self, subject: &String) -> Res<Option<String>>;

@@ -259,29 +259,21 @@ impl Database for MongoDB {
         }
     }
 
-    async fn pop_first_queue_pos(&self, owner: i64, subject: &String) -> Res<String> {
-        let group = self.find_group(owner).await?;
-
-        if let Some(group) = group {
-            let queue = self.find_queue(&group, &subject).await?;
-
-            if let Some(queue) = queue {
-                self.database
-                    .collection::<bson::Document>("queues")
-                    .update_one(
-                        doc! {
-                        "_id": ObjectId::with_string(&queue)?,
+    async fn pop_first_queue_pos(&self, queueid: &String) -> Res<String> {
+        self.database
+            .collection::<bson::Document>("queues")
+            .update_one(
+                doc! {
+                        "_id": ObjectId::with_string(&queueid)?,
                     },
-                        doc! {
+                doc! {
                         "$pop": {
                             "records": -1
                         }
                     },
-                        None,
-                    )
-                    .await?;
-            }
-        }
+                None,
+            )
+            .await?;
 
         Ok("".to_string())
     }

@@ -23,7 +23,7 @@ pub async fn add_subject(cx: &Cx, subject: Option<String>) -> Res {
                 nickname,
                 subject.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -51,7 +51,7 @@ pub async fn rm_subject(cx: &Cx, subject: Option<String>, db: &DB) -> Res {
                 nickname,
                 subject.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -72,7 +72,28 @@ pub async fn pop(cx: &Cx, subject: Option<String>, db: &DB) -> Res {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
 
-            db.pop_first_queue_pos(user.id, &subject.clone().unwrap())
+            let group = db.find_group(user.id).await?;
+
+            if None == group {
+                cx.answer("Seems like there is not any group")
+                    .await?;
+
+                return Ok(());
+            }
+
+            let queue = db.find_queue(&group.unwrap(), &subject.clone().unwrap()).await?;
+
+            if None == queue {
+                cx.answer(format!(
+                    "Seems like there is not such #{} subject in the group",
+                    subject.unwrap()
+                ))
+                    .await?;
+
+                return Ok(());
+            }
+
+            db.pop_first_queue_pos(&queue.unwrap())
                 .await?;
 
             cx.answer(format!(
@@ -80,7 +101,7 @@ pub async fn pop(cx: &Cx, subject: Option<String>, db: &DB) -> Res {
                 nickname,
                 subject.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -107,7 +128,7 @@ pub async fn shift(cx: &Cx, subject: Option<String>, username: Option<String>) -
                     nickname,
                     subject.unwrap()
                 ))
-                .await?;
+                    .await?;
                 return Ok(());
             }
 
@@ -117,7 +138,7 @@ pub async fn shift(cx: &Cx, subject: Option<String>, username: Option<String>) -
                 username.unwrap(),
                 subject.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -143,7 +164,7 @@ pub async fn ban(cx: &Cx, username: Option<String>) -> Res {
                 nickname,
                 username.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
@@ -169,7 +190,7 @@ pub async fn delete_group(cx: &Cx, group_id: Option<String>) -> Res {
                 nickname,
                 group_id.unwrap()
             ))
-            .await?;
+                .await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;
