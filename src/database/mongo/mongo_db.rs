@@ -17,6 +17,7 @@ pub enum MongoDBError {
 impl Error for MongoDBError {}
 
 use MongoDBError::*;
+use teloxide::types::Document;
 
 #[derive(Serialize, Deserialize)]
 struct MongoGroup {
@@ -239,10 +240,8 @@ impl Database for MongoDB {
         Ok(())
     }
 
-    async fn pop_first_queue_pos(&self, owner: i64, subject: &String) -> Res<String> {
-        let group = self.find_group(owner).await?.unwrap();
-
-        let queue = self
+    async fn find_queue(&self, group: &String, subject: &String) -> Res<Option<String>> {
+        let queue: Option<mongodb::bson::Document> = self
             .database
             .collection::<bson::Document>("queues")
             .find_one(
@@ -255,22 +254,34 @@ impl Database for MongoDB {
             .await?;
 
         if let Some(queue) = queue {
-            let id = Some(queue.get_object_id("_id")?.to_hex()).unwrap();
+            Ok(Some(queue.get_object_id("_id")?.to_hex()))
+        } else {
+            Ok(None)
+        }
+    }
 
-            self.database
-                .collection::<bson::Document>("queues")
-                .update_one(
-                    doc! {
-                        "_id": ObjectId::with_string(&id)?,
+    async fn pop_first_queue_pos(&self, owner: i64, subject: &String) -> Res<String> {
+        let group = self.find_group(owner).await?;
+
+        if let Some(group) = group {
+            let queue = self.find_queue(&group, &subject).await?;
+
+            if let Some(queue) = queue {
+                self.database
+                    .collection::<bson::Document>("queues")
+                    .update_one(
+                        doc! {
+                        "_id": ObjectId::with_string(&queue)?,
                     },
-                    doc! {
+                        doc! {
                         "$pop": {
                             "records": -1
                         }
                     },
-                    None,
-                )
-                .await?;
+                        None,
+                    )
+                    .await?;
+            }
         }
 
         Ok("".to_string())
