@@ -61,7 +61,7 @@ pub async fn rm_subject(cx: &Cx, subject: Option<String>, db: &DB) -> Res {
     Ok(())
 }
 
-pub async fn pop(cx: &Cx, subject: Option<String>) -> Res {
+pub async fn pop(cx: &Cx, subject: Option<String>, db: &DB) -> Res {
     if None == subject {
         cx.reply_to("Seems like you forget to specify subject")
             .await?;
@@ -71,6 +71,31 @@ pub async fn pop(cx: &Cx, subject: Option<String>) -> Res {
     match cx.update.from() {
         Some(user) => {
             let nickname = user.clone().username.expect("Must be user");
+
+            let group = db.find_group(user.id).await?;
+
+            if None == group {
+                cx.answer("Seems like there is not any group").await?;
+
+                return Ok(());
+            }
+
+            let queue = db
+                .find_queue(&group.unwrap(), &subject.clone().unwrap())
+                .await?;
+
+            if None == queue {
+                cx.answer(format!(
+                    "Seems like there is not such #{} subject in the group",
+                    subject.unwrap()
+                ))
+                .await?;
+
+                return Ok(());
+            }
+
+            db.pop_first_queue_pos(&queue.unwrap()).await?;
+
             cx.answer(format!(
                 "@{} popped first pos from #{} queue.",
                 nickname,
