@@ -28,4 +28,6 @@ pub trait Database: Send + Sync {
     async fn set_username(&self, member: i64, username: &String) -> Res<()>;
 
     async fn add_subject(&self, owner: i64, subject: &String) -> Res<(String)>;
+    async fn find_subject(&self, subject: &String) -> Res<Option<String>>;
+    async fn rm_subject(&self, owner: i64, subject: &String) -> Res<(String)>;
 }
