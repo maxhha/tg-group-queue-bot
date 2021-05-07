@@ -270,13 +270,13 @@ impl Database for MongoDB {
                     .collection::<bson::Document>("queues")
                     .update_one(
                         doc! {
-                        "_id": ObjectId::with_string(&queue)?,
-                    },
+                            "_id": ObjectId::with_string(&queue)?,
+                        },
                         doc! {
-                        "$pop": {
-                            "records": -1
-                        }
-                    },
+                            "$pop": {
+                                "records": -1
+                            }
+                        },
                         None,
                     )
                     .await?;
