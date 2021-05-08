@@ -2,6 +2,7 @@ use crate::Database;
 use std::sync::Arc;
 use teloxide::prelude::*;
 
+use crate::command::errors::*;
 use std::error::Error;
 
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
@@ -35,11 +36,27 @@ pub async fn common_start(cx: &Cx, group_id: Option<String>, db: &DB) -> Res {
     Ok(())
 }
 
-pub async fn link(cx: &Cx) -> Res {
+pub async fn link(cx: &Cx, db: &DB) -> Res {
     match cx.update.from() {
         Some(user) => {
-            let nickname = user.clone().username.expect("Must be user");
-            cx.answer(format!("Your invite link is : {}", "")).await?;
+            let botname = cx
+                .requester
+                .get_me()
+                .await?
+                .user
+                .username
+                .ok_or(NoBotUsernameError)?;
+
+            if let Some(group) = db.find_group(user.id).await? {
+                cx.answer(format!(
+                    "Your invite link:\nhttps://t.me/{}?start={}",
+                    botname, group
+                ))
+                .await?;
+            } else {
+                cx.answer("Sorry, you must be membering in a group.")
+                    .await?;
+            }
         }
         None => {}
     }
