@@ -67,7 +67,7 @@ pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res
     match command {
         Command::Help => get_help_msg(&cx, &db).await,
         Command::Start { group_id } => start(&cx, group_id.into(), &db).await,
-        Command::Link => link(&cx).await,
+        Command::Link => link(&cx, &db).await,
         Command::Name { username } => name(&cx, username.into(), &db).await,
         Command::Push { subject, msg } => push(&cx, subject.into(), msg.into()).await,
         Command::Skip { subject } => skip(&cx, subject.into()).await,
