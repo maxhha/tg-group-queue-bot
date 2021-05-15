@@ -1,4 +1,5 @@
 use crate::Database;
+use futures::future::try_join_all;
 use std::sync::Arc;
 use teloxide::prelude::*;
 
@@ -41,8 +42,38 @@ pub async fn adm_start(cx: &Cx, db: &DB) -> Res {
     Ok(())
 }
 
-pub async fn ls_groups(cx: &Cx) -> Res {
-    cx.answer(format!("List of all registered groups:")).await?;
+pub async fn ls_groups(cx: &Cx, db: &DB) -> Res {
+    match cx.update.from() {
+        Some(user) => {
+            if db.is_admin(user.id).await? {
+                let groups = db.list_all_groups().await?;
+
+                let groups =
+                    try_join_all(groups.iter().map(|group_id| db.get_group(group_id))).await?;
+
+                let groups = groups
+                    .into_iter()
+                    .map(|group| match group {
+                        Some(group) => format!("#{} owner: {}\n", group.id, group.owner),
+                        None => "".into(),
+                    })
+                    .reduce(|a, x| a + &x);
+
+                if let Some(groups) = groups {
+                    cx.answer(format!("List of all registered groups:\n{}", groups))
+                        .await?;
+                } else {
+                    cx.answer("There is no groups.").await?;
+                }
+            } else {
+                cx.answer("You are not admin!").await?;
+            }
+        }
+        None => {
+            cx.answer("Use this command as common message").await?;
+        }
+    }
+
     Ok(())
 }
 

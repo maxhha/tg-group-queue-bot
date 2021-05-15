@@ -78,7 +78,7 @@ pub async fn answer(cx: Cx, command: Command, db: Arc<Box<dyn Database>>) -> Res
         Command::Shift { subject, username } => shift(&cx, subject.into(), username.into()).await,
         Command::Ban { username } => ban(&cx, username.into()).await,
         Command::DeleteGroup { group_id } => delete_group(&cx, group_id.into()).await,
-        Command::LsGroups {} => ls_groups(&cx).await,
+        Command::LsGroups {} => ls_groups(&cx, &db).await,
         Command::LsGroup { id } => ls_group(&cx, id.into()).await,
         Command::RmGroup { id } => rm_group(&cx, id.into()).await,
         Command::TotalBan { username } => total_ban(&cx, username.into()).await,
@@ -136,13 +136,23 @@ Bot admin level:\n\
 async fn get_help_msg(cx: &Cx, db: &Arc<Box<dyn Database>>) -> Res {
     match cx.update.from() {
         Some(user) => {
-            let nickname = user.clone().username.expect("Must be user");
-
-            if db.is_admin(user.id).await? {
-                cx.answer(BOT_ADMIN_HELP_MSG).await?;
+            let message = if db.is_admin(user.id).await? {
+                BOT_ADMIN_HELP_MSG
+            } else if let Some(group) = db.find_group(user.id).await? {
+                if let Some(group) = db.get_group(&group).await? {
+                    if group.owner == user.id {
+                        GROUP_ADMIN_HELP_MSG
+                    } else {
+                        USER_HELP_MSG
+                    }
+                } else {
+                    USER_HELP_MSG
+                }
             } else {
-                cx.answer(USER_HELP_MSG).await?;
-            }
+                USER_HELP_MSG
+            };
+
+            cx.answer(message).await?;
         }
         None => {
             cx.answer("Use this command as common message").await?;

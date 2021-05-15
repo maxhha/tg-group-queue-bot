@@ -1,5 +1,6 @@
 use crate::database::{Database, Group, Member, Res};
 use async_trait::async_trait;
+use futures::stream::StreamExt;
 use mongodb::bson;
 use mongodb::bson::{doc, oid::ObjectId};
 use mongodb::{options::ClientOptions, Client};
@@ -7,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::env;
 use std::error::Error;
 use std::fmt::Display;
+use std::iter::Iterator;
 use tokio_compat_02::FutureExt;
 
 #[derive(Debug, Display)]
@@ -157,6 +159,26 @@ impl Database for MongoDB {
         }
     }
 
+    async fn list_all_groups(&self) -> Res<Vec<String>> {
+        let groups = self
+            .database
+            .collection::<bson::Document>("groups")
+            .find(
+                None,
+                mongodb::options::FindOptions::builder()
+                    .projection(doc! { "_id": true })
+                    .build(),
+            )
+            .await?
+            .collect::<Vec<Result<bson::Document, mongodb::error::Error>>>()
+            .await;
+
+        groups
+            .into_iter()
+            .map(|x| Ok(x?.get_object_id("_id")?.to_hex()))
+            .collect()
+    }
+
     async fn create_group(&self, owner: i64) -> Res<String> {
         let group = self
             .database
@@ -278,7 +300,7 @@ impl Database for MongoDB {
         Ok("".to_string())
     }
 
-    async fn add_subject(&self, owner: i64, subject: &String) -> Res<(String)> {
+    async fn add_subject(&self, owner: i64, subject: &String) -> Res<String> {
         let group = self.find_group(owner).await?.unwrap();
 
         let queue = self
@@ -332,7 +354,7 @@ impl Database for MongoDB {
         }
     }
 
-    async fn rm_subject(&self, owner: i64, subject: &String) -> Res<(String)> {
+    async fn rm_subject(&self, owner: i64, subject: &String) -> Res<()> {
         let group = self.find_group(owner).await?.unwrap();
 
         let queue = self.find_subject(subject).await?;
@@ -365,6 +387,6 @@ impl Database for MongoDB {
                 .await?;
         }
 
-        Ok(("".to_string()))
+        Ok(())
     }
 }
